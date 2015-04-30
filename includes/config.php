@@ -15,10 +15,10 @@
 	if($Config['localhost']==1){
 		$Config['DbHost']			= 'localhost';
 		$Config['DbUser']			= 'root';
-		$Config['DbPassword']			= 'bigBLUE650#';
+		$Config['DbPassword']			= '';
 		$Config['DbName']			= 'ezshare';
-		$Config['Url']				= 'http://207.201.237.111:8888/ezshare/';
-		$Config['Online']			= '1';
+		$Config['Url']				= 'http://localhost/ezshare/';
+		$Config['Online']			= '0';
 		$Config['DbMain']			= 'ezshare';
 	
 	}else{
@@ -87,8 +87,7 @@ $Config['ShippingNote'] = '<strong>Note:</strong>
 	$move = '<img src="'.$Config['Url'].'images/move.png" border="0"  onMouseover="ddrivetip(\'<center>Move</center>\', 40,\'\')"; onMouseout="hideddrivetip()" >';
 	$search = '<img src="'.$Config['Url'].'images/search.png" border="0"  onMouseover="ddrivetip(\'<center>Search</center>\', 40,\'\')"; onMouseout="hideddrivetip()" >';
 	$download = '<img src="'.$Config['Url'].'images/download.png" border="0"  onMouseover="ddrivetip(\'<center>Download</center>\', 60,\'\')"; onMouseout="hideddrivetip()" >';
-$viewmeetings = '<img src="'.$Config['Url'].'images/tww.png" border="0"  onMouseover="ddrivetip(\'<center>Meetings</center>\', 60,\'\')"; onMouseout="hideddrivetip()" >';
-
+	$viewmeetings = '<img src="'.$Config['Url'].'images/tww.png" border="0"  onMouseover="ddrivetip(\'<center>Meetings</center>\', 60,\'\')"; onMouseout="hideddrivetip()" >';
 	/************************/
 	$Config['SalesCommission'] = 1;
 	
