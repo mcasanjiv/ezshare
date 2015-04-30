@@ -1,0 +1,27 @@
+<? 
+if($arryCompany[0]['Image'] !='' && file_exists($Prefix.'upload/company/'.$arryCompany[0]['Image']) ){
+	$SiteLogo = $Prefix.'resizeimage.php?w=120&h=120&bg=f1f1f1&img=upload/company/'.$arryCompany[0]['Image'];
+}else{
+	$SiteLogo = $Prefix.'images/logo.png';
+}
+?>
+<div class="header-container">
+    <div class="logo" id="logo"><a href="<?=$MainPrefix?>dashboard.php"><img src="<?=$SiteLogo?>" border="0" alt="<?=$Config['SiteName']?>" title="<?=$Config['SiteName']?>"/></a></div>
+    <? #echo (!empty($CurrentDepartment)?('<div class="crm">'.$CurrentDepartment.'</div>'):('')); ?>
+    <div class="top-right-nav">
+      <ul class="clearfix log_link">
+	  
+		
+		<li class="logout"><a href="<?=$MainPrefix?>logout.php" onclick="Javascript:ShowHideLoader('2','P');"><span>Log Out</span></a></li>
+		<li class="chpassword"><a class="fancybox fancybox.iframe" href="<?=$MainPrefix?>chPassword.php"><span>Change Password</span></a></li>
+	</ul>
+	
+	<ul class="clearfix">	
+	  	<? if($SelfPage!="dashboard.php"){ ?>
+        <li class="location"><span>Location:</span> <? echo stripslashes($arryCurrentLocation[0]['City']).", ".stripslashes($arryCurrentLocation[0]['State']).", ".stripslashes($arryCurrentLocation[0]['Country']); ?></li>
+        <li class="dash-back"><a href="<?=$MainPrefix?>dashboard.php">Back to <span>Main Dashboard</span></a></li>
+		<? } ?>
+        <li class="welcome">Welcome <span><?=$_SESSION['UserName']?>!</span></li>
+      </ul>
+    </div>
+</div>

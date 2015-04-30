@@ -1,0 +1,100 @@
+<?php $PopupPage=1; $LoginPage=1 ; $HideNavigation = 1;
+	require_once("includes/header.php");
+	require_once("../classes/company.class.php");
+	require_once("../classes/employee.class.php");
+	require_once("../classes/user.class.php");
+	$objCompany=new company();
+	$objEmployee=new employee();
+	$objUser=new user();
+	
+	CleanGet();
+
+
+	if($_POST) { 
+		CleanPost();
+
+		if (empty($_POST['Email'])) {
+			$_SESSION['mess_forgot'] = ENTER_EMAIL;
+		} else{
+
+			$arryMain = $objCompany->GetCompanyDisplay($_GET["c"]);
+			$DbName2 = $Config['DbName']."_".$arryMain[0]['DisplayName'];
+			$CmpID = $arryMain[0]['CmpID'];
+
+			$Config['MailFooter'] = '['.stripslashes($arryMain[0]['CompanyName']).']';
+			$Config['AdminEmail'] = stripslashes($arryMain[0]['Email']) ;
+			$Config['DisplayName'] = $arryMain[0]['DisplayName'] ;
+
+			$UserType = mysql_real_escape_string($_POST['UserType']); 
+			$Email = mysql_real_escape_string($_POST['Email']); 
+			$CmpID = mysql_real_escape_string($_POST['CmpID']); 
+
+			if($UserType=="admin"){  // Admin 
+			 
+				/********Connecting to main database*********/
+				$Config['DbName'] = $Config['DbMain'];
+				$objConfig->dbName = $Config['DbName'];
+				$objConfig->connect();
+				/*******************************************/
+				if($objCompany->ForgotPassword($Email,$CmpID)){
+					$_SESSION['mess_forgot'] = FORGOT_SUCC;
+				} else{
+					$_SESSION['mess_forgot'] = INVALID_EMAIL; 
+				}	
+			}else if($UserType=="employee"){  // Employee 
+				/********Connecting to main database*********/
+				$Config['DbName'] = $DbName2;
+				$objConfig->dbName = $Config['DbName'];
+				$objConfig->connect();  
+				/*******************************************/
+				if($objEmployee->ForgotPassword($Email)){
+					$_SESSION['mess_forgot'] = FORGOT_SUCC;
+				} else{
+					$_SESSION['mess_forgot'] = INVALID_EMAIL; 
+				}	
+			}else{
+				$_SESSION['mess_forgot'] = ERROR_SEND_MAIL; 
+			}
+
+		}
+
+		/*header("location: forgot.php?c=".$_GET['c']);
+		exit;*/
+		
+	}
+
+
+	if($_GET['t']=='e' && empty($_POST['UserType']))$_POST['UserType'] = 'employee';
+
+
+	/***********************/
+	$Config['DbName'] = $Config['DbMain'];
+	$objConfig->dbName = $Config['DbName'];
+	$objConfig->connect();
+	if(!empty($_GET["c"])){
+		$arryCompany = $objCompany->GetCompanyByDisplay($_GET["c"]);
+		if(empty($arryCompany[0]["CmpID"])){
+			$ErrorMsg = ERROR_INACTIVE_ADMIN;
+		}else{
+			$Config['DbName2'] = $Config['DbName']."_".$arryCompany[0]["DisplayName"];
+			if(!$objConfig->connect_check()){
+				$ErrorMsg = ERROR_NO_DB;
+			}
+		}
+	}else{
+		$ErrorMsg = ERROR_INACTIVE_PAGE;
+	}
+
+	/***********************/
+
+
+
+
+
+
+
+
+
+
+	require_once("includes/footer.php"); 
+ ?>

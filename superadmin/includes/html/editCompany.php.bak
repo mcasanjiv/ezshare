@@ -1,0 +1,37 @@
+
+
+<div ><a href="<?=$RedirectURL?>" class="back">Back</a></div>
+
+
+<div class="had">
+Manage Company    <span> &raquo;
+	<? 
+	if(!empty($_GET['edit'])){
+		if($_GET["tab"]=="DateTime"){
+			echo "Edit DateTime Settings";
+		}else{
+			echo "Edit ".ucfirst($_GET["tab"])." Details";
+		}
+	}else{
+		echo "Add ".$ModuleName;
+	}
+	 ?>
+		
+		</span>
+</div>
+	<? if (!empty($errMsg)) {?>
+    <div height="2" align="center"  class="red" ><?php echo $errMsg;?></div>
+
+  <? } ?>
+
+
+	<? 
+	if (!empty($_GET['edit'])) {
+		include("includes/html/box/company_edit.php");
+	}else{
+		include("includes/html/box/company_form.php");
+	}
+	
+	
+	?>
+

@@ -1,0 +1,102 @@
+<?php	
+define("BLOCKED_MSG","You have been blocked.");
+define("CURRENCY_INFO","<strong>All amounts stated in [Currency].</strong>");
+define("COMPANY_PROFILE_UPDATED","Company profile has been updated successfully.");
+define("COMPANY_ACCOUNT_UPDATED","Company account details has been updated successfully.");
+define("CURRENCY_UPDATED","Currency has been updated successfully.");
+define("GLOBAL_UPDATED","Global settings has been updated successfully.");
+
+define("DATETIME_UPDATED","DateTime settings has been updated successfully.");
+define("DASH_ICON_UPDATED","Dashboard Icon settings has been updated successfully.");
+define("DOC_UPLOADED","Document has been uploaded successfully.");
+
+define("CUSTOM_FIELD_UPDATED","Custom fields has been updated successfully.");
+define("CLICK_TO_SELECT","Click here to select");
+
+define('EMAIL_SEND',"Email has been send successfully.");
+
+define("ENTER_MANDATORY_FIELDS", "Please enter all mandatory fields.");
+define("ENTER_EMAIL", "Please Enter Email Address.");
+define("ENTER_PASSWORD", "Please Enter Password.");
+define("ENTER_OLD_PASSWORD", "Please Enter Old Password.");
+define("ENTER_NEW_PASSWORD", "Please Enter New Password.");
+define("ENTER_CONFIRM_PASSWORD", "Please Enter Confirm Password.");
+define("CONFIRM_PASSWORD_NOT_MATCH", "Confirm Password do not match.");
+define("WRONG_OLD_PASSWORD", "Wrong Old Password.");
+
+define("ERROR_INACTIVE_ADMIN","Sorry, the company admin section you have requested<br>is currently not active.");
+define("ERROR_INACTIVE_PAGE","Sorry, the page you have requested is currently not active.");
+define("ERROR_NO_DB","Sorry, database does not exist for this company. Please contact the administrator.");
+define("ERROR_NOT_AUTH","Sorry, you are not authorized to access this section.");
+define("ERROR_SEND_MAIL","Error in sending email.");
+
+define('FACILITY_NA',"This facility is not availble.");
+define('FORGOT_MESSAGE',"Please enter the email address and click SUBMIT and we will send your new password on your email address.");
+define('FORGOT_SUCC',"Your password has been send on your email address.");
+
+define("INVALID_EMAIL","Invalid Email Address.");
+define("INVALID_EMAIL_PASSWORD","Invalid Email/Password.");
+define("INVALID_EXCEL_FILE","Invalid excel file.");
+
+define("LOCATION_LIMIT_REACHED","Number of location has reached its limit of [NumLocation] locations.");
+
+define("MODULE_INACTIVE_SETTING","This module has not been activated from Settings.");
+define("NO_LOCATION","No location found.");
+define("NOTIFICATION_REMOVED","Notification has been removed successfully.");
+
+define("QUICK_ENTRY","Quick Entry");
+
+
+define("PROCESSING","Processing.....");
+define("PLEASE_WAIT","Please Wait.....");
+define("LOADER_MSG_IMG","Please wait. Uploading.......<br><br><img src='../images/ajaxloader.gif'>");
+
+define("SELECT_LOCATION","Select Location");
+
+define("VALID_EMAIL","Please Enter Valid Email Address.");
+
+define("LEAVE_BLANK_PASSWORD","(Leave it blank, if do not want to change password.)");
+
+
+define("LOCATION_ADDED","Location has been added successfully.");
+define("LOCATION_UPDATED","Location has been updated successfully.");
+define("LOCATION_REMOVED","Location has been removed successfully.");
+define("LOCATION_STATUS_CHANGED","Location Status has been changed successfully.");
+
+define("PASSWORD_CHANGED","Your Password has been changed successfully.");
+define("PASSWORD_NOT_UPDATED","Password Not Updated.");
+define("PASSWORD_LIMIT","(Password Limit: 5 to 15 characters.)");
+
+
+define("FILE_NOT_UPLOADED","Error: File Not Uploaded !!");
+define("IN_LAKH_ANUM","(In Lakhs per Annum)");
+define("INVALID_REQUEST","Invalid Request.");
+define("UNDER_CONSTRUCTION","Under construction");
+
+define("NO_RECORD","No record found.");
+define("NO_LOCATION","No location found.");
+define("NO_MODULE","<span class=red>No module found.</span>");
+define("NO_NOTIFICATION","No Notifications.");
+
+define("NOT_ASSIGNED","<span class=red>Not assigned.</span>");
+define("NOT_SPECIFIED","<span class=red>Not specified.</span>");
+define("NOT_UPLOADED","<span class=red>Not uploaded.</span>");
+define("NO_DOCUMENT_UPLOADED","No document uploaded.");
+
+define("LOADER_MSG_L","Please wait.....<br>Loading data from server.");
+define("LOADER_MSG_F","Please wait.....<br>Searching data from server.");
+define("LOADER_MSG_S","Please wait.....<br>Saving data.....");
+define("LOADER_MSG_P","Please wait.......<br>Processing.......");
+define("LOADER_MSG_O","Please wait.......<br>Logging Off.......");
+
+define("SEARCH_KEYWORD","Search Keyword");
+
+define("WEBSITE_FORMAT","(Website URL should start with http:// )");
+
+define("BLANK_ASSIGN_AUTO","If you leave this field blank, A number will be assigned automatically.");
+
+define("UPLOAD_ERROR_EXT","There was an error uploading the file due to file extension, please try again.");
+define("UPLOAD_ERROR_SIZE","There was an error uploading the file due to file size, please try again.");
+define("RECORD_NOT_EXIST","This record no longer exist in the database.");
+
+?>

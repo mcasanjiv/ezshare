@@ -1,0 +1,152 @@
+<?
+
+class tax extends dbClass {
+
+    var $tables;
+
+    // consturctor 
+    function tax() {
+        global $configTables;
+        $this->tables = $configTables;
+        $this->dbClass();
+    }
+
+             
+    /*     * ****************************************************Functions For Taxes*********************************************************** */
+
+                        function addTaxClass($arryDetails) {
+                            @extract($arryDetails);
+                            $sql = "INSERT INTO  inv_tax_classes SET ClassName='" . $ClassName . "', ClassDescription = '" . $ClassDescription . "',Status='" . $Status . "'";
+                            $this->query($sql, 0);
+                        }
+
+                        function getTaxClasses() {
+                            $sql = "SELECT * from inv_tax_classes  ORDER BY ClassId DESC ";
+                            return $this->query($sql, 1);
+                        }
+
+                        function getClasses() {
+                            $sql = "SELECT * from inv_tax_classes WHERE Status = 1 ORDER BY ClassId DESC ";
+                            return $this->query($sql, 1);
+                        }
+
+                        function getTaxClassById($id) {
+                            $sql = "SELECT * from inv_tax_classes WHERE ClassId = " . $id . "";
+                            return $this->query($sql, 1);
+                        }
+
+                        function updateTaxClass($arryDetails) {
+                            @extract($arryDetails);
+                            $sql = "UPDATE  inv_tax_classes SET ClassName='" . $ClassName . "', ClassDescription = '" . $ClassDescription . "',Status='" . $Status . "' WHERE ClassId =" . $taxclassId;
+                            $this->query($sql, 0);
+                        }
+
+                        function deleteTaxClass($id) {
+
+                            $sql = "DELETE from inv_tax_classes where ClassId = " . $id;
+                            $rs = $this->query($sql, 0);
+
+                            if (sizeof($rs))
+                                return true;
+                            else
+                                return false;
+                        }
+
+                        function changeTaxClassStatus($id) {
+                            $sql = "select * from inv_tax_classes where ClassId=" . $id;
+                            $rs = $this->query($sql);
+                            if (sizeof($rs)) {
+                                if ($rs[0]['Status'] == 'Yes')
+                                    $Status = 'No';
+                                else
+                                    $Status = 'Yes';
+
+                                $sql = "update inv_tax_classes set Status='" . $Status . "' where ClassId=" . $id;
+                                $this->query($sql, 0);
+                                return true;
+                            }
+                        }
+
+                        function addTax($arryDetails) {
+                            @extract($arryDetails);
+
+                            $UserLevel = $arryDetails['user_level'][0] . "," . $arryDetails['user_level'][1];
+                            $UserLevel = rtrim($UserLevel);
+
+                            $sql = "INSERT INTO inv_tax_rates SET ClassId='" . $ClassId . "', Coid = '" . $Coid . "', Stid ='" . $main_state_id . "', TaxRate ='" . $TaxRate . "', UserLevel= '" . $UserLevel . "', RateDescription = '" . $RateDescription . "', Status='" . $Status . "'";
+                            $this->query($sql, 0);
+                        }
+
+                        function getTaxes() {
+                            $sql = "SELECT * from inv_tax_rates ORDER BY RateId DESC";
+                            return $this->query($sql, 1);
+                        }
+
+                        function getTaxClassName($classID) {
+                            $sql = "select ClassName from inv_tax_classes where ClassId=" . $classID;
+                            return $this->query($sql, 1);
+                        }
+
+                        function getTaxById($id) {
+                            $sql = "SELECT * from inv_tax_rates WHERE RateId = " . $id . "";
+                            return $this->query($sql, 1);
+                        }
+
+                        function updateTax($arryDetails) {
+                            @extract($arryDetails);
+
+                            $UserLevel = $arryDetails['user_level'][0] . "," . $arryDetails['user_level'][1];
+                            $UserLevel = rtrim($UserLevel);
+
+                            $sql = "UPDATE  inv_tax_rates SET ClassId='" . $ClassId . "', Coid = '" . $Coid . "', Stid ='" . $main_state_id . "', TaxRate ='" . $TaxRate . "', UserLevel= '" . $UserLevel . "', RateDescription = '" . $RateDescription . "', Status='" . $Status . "' WHERE RateId=" . $taxId;
+                            $this->query($sql, 0);
+                        }
+
+                        function deleteTax($id) {
+
+                            $sql = "DELETE from inv_tax_rates where RateId = " . $id;
+                            $rs = $this->query($sql, 0);
+
+                            if (sizeof($rs))
+                                return true;
+                            else
+                                return false;
+                     }
+
+                        function changeTaxStatus($id) {
+                            $sql = "select * from inv_tax_rates where RateId=" . $id;
+                            $rs = $this->query($sql);
+                            if (sizeof($rs)) {
+                                if ($rs[0]['Status'] == 'Yes')
+                                    $Status = 'No';
+                                else
+                                    $Status = 'Yes';
+
+                                $sql = "update inv_tax_rates set Status='" . $Status . "' where RateId=" . $id;
+                                $this->query($sql, 0);
+                                return true;
+                            }
+                        }
+
+
+function GetTaxRate($ClassId)
+		{
+
+			$strSQLFeaturedQuery = (!empty($ClassId))?(" where ClassId='".$ClassId."' and Status='Yes' and locationID=".$_SESSION['locationID']):("");
+
+			$OrderSql = " order by ClassId asc";
+
+			  $strSQLQuery = "select * from inv_tax_rates ".$strSQLFeaturedQuery.$OrderSql;
+			
+
+			return $this->query($strSQLQuery, 1);
+		}
+
+
+
+    /*     * ***************************************************************End Functions For Taxes****************************************************************** */
+
+   
+ }
+
+?>

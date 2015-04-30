@@ -1,0 +1,675 @@
+<?
+class configure extends dbClass
+{	
+		
+	
+		///////  Attribute Management //////
+
+		function  GetAttributeValue($attribute_name,$OrderBy)
+		{
+			
+			$strSQLFeaturedQuery = (!empty($attribute_name))?(" where a.attribute_name='".$attribute_name."' and v.Status=1 and locationID=".$_SESSION['locationID']):("");
+
+			$OrderSql = (!empty($OrderBy))?(" order by v.".$OrderBy." asc"):(" order by v.value_id asc");
+
+			$strSQLQuery = "select v.* from attribute_value v inner join attribute a on v.attribute_id = a.attribute_id ".$strSQLFeaturedQuery.$OrderSql;
+
+			return $this->query($strSQLQuery, 1);
+		}
+
+		function  GetAttributeByValue($attribute_value,$attribute_name)
+		{
+			
+			$strSQLFeaturedQuery = (!empty($attribute_name))?(" where a.attribute_name='".$attribute_name."' and locationID=".$_SESSION['locationID']):("");
+
+			$strSQLFeaturedQuery .= (!empty($attribute_value))?(" and v.attribute_value like '".$attribute_value."%'"):("");
+
+			$strSQLQuery = "select v.attribute_value from attribute_value v inner join attribute a on v.attribute_id = a.attribute_id ".$strSQLFeaturedQuery;
+
+			return $this->query($strSQLQuery, 1);
+		}	
+
+		function GetCrmAttribute($attribute_name,$OrderBy)
+		{
+
+			$strSQLFeaturedQuery = (!empty($attribute_name))?(" where a.attribute_name='".$attribute_name."' and v.Status=1"):("");
+
+			$OrderSql = (!empty($OrderBy))?(" order by v.".$OrderBy." asc"):(" order by v.value_id asc");
+
+			$strSQLQuery = "select v.* from attribute_value v inner join attribute a on v.attribute_id = a.attribute_id ".$strSQLFeaturedQuery.$OrderSql;
+
+			return $this->query($strSQLQuery, 1);
+		}
+
+		function getAllCrmAttribute($id=0,$attribute_id,$Status=0)
+		{
+			$sql = " where 1 ";
+			$sql .= (!empty($id))?(" and value_id = '".$id."'"):("");
+			$sql .= (!empty($attribute_id))?(" and attribute_id = '".$attribute_id."'"):("");
+			$sql .= (!empty($Status) && $Status == 1)?(" and Status = '".$Status."'"):("");
+
+			$sql = "select * from attribute_value ".$sql." order by value_id asc" ;
+
+			return $this->query($sql, 1);
+		}
+
+
+		function  GetFixedAttribute($attribute_name,$OrderBy)
+		{
+			
+			$strSQLFeaturedQuery = (!empty($attribute_name))?(" where a.attribute_name='".$attribute_name."' and v.Status=1 "):("");
+
+			$OrderSql = (!empty($OrderBy))?(" order by v.".$OrderBy." asc"):(" order by v.value_id asc");
+
+			$strSQLQuery = "select v.* from attribute_value v inner join attribute a on v.attribute_id = a.attribute_id ".$strSQLFeaturedQuery.$OrderSql;
+
+			return $this->query($strSQLQuery, 1);
+		}
+
+		function  AllAttributes($id)
+		{
+			$strSQLQuery = " where 1 ";
+			$strSQLQuery .= (!empty($id))?(" and attribute_id in(".$id.")"):("");
+		
+			$strSQLQuery = "select * from attribute ".$strSQLQuery." order by attribute_id Asc" ;
+
+			return $this->query($strSQLQuery, 1);
+		}	
+			
+		function addAttribute($arryAtt)
+		{
+			@extract($arryAtt);	 
+			$sql = "insert into attribute_value (attribute_value,attribute_id,Status,locationID) values('".addslashes($attribute_value)."','".$attribute_id."','".$Status."','".$_SESSION['locationID']."')";
+			$rs = $this->query($sql,0);
+			$lastInsertId = $this->lastInsertId();
+
+			if(sizeof($rs))
+				return true;
+			else
+				return false;
+
+		}
+		function updateAttribute($arryAtt)
+		{
+			@extract($arryAtt);	
+			$sql = "update attribute_value set attribute_value = '".addslashes($attribute_value)."',attribute_id = '".$attribute_id."',Status = '".$Status."'  where value_id = '".$value_id."'"; 
+			$rs = $this->query($sql,0);
+				
+			if(sizeof($rs))
+				return true;
+			else
+				return false;
+
+		}
+		function getAttribute($id=0,$attribute_id,$Status=0)
+		{
+			$sql = " where 1 ";
+			$sql .= (!empty($id))?(" and value_id = '".$id."'"):(" and locationID=".$_SESSION['locationID']);
+			$sql .= (!empty($attribute_id))?(" and attribute_id = '".$attribute_id."'"):("");
+			$sql .= (!empty($Status) && $Status == 1)?(" and Status = '".$Status."'"):("");
+
+			$sql = "select * from attribute_value ".$sql." order by value_id asc" ;
+		
+			return $this->query($sql, 1);
+		}
+		function countAttributes()
+		{
+			$sql = "select sum(1) as NumAttribute from attribute_value where Status=1" ;
+			return $this->query($sql, 1);
+		}
+
+		function changeAttributeStatus($value_id)
+		{
+			if(!empty($value_id)){
+				$sql="select value_id,Status from attribute_value where value_id='".$value_id."'";
+				$rs = $this->query($sql);
+				if(sizeof($rs))
+				{
+					if($rs[0]['Status']==1)
+						$Status=0;
+					else
+						$Status=1;
+						
+					$sql="update attribute_value set Status='$Status' where value_id='".mysql_real_escape_string($value_id)."'";
+					$this->query($sql,0);
+					
+				}	
+			}
+			return true;
+		}
+
+		function deleteAttribute($id)
+		{
+			if(!empty($id)){
+				$sql = "delete from attribute_value where value_id = '".mysql_real_escape_string($id)."'";
+				$rs = $this->query($sql,0);
+			}
+
+			return true;
+		}
+	
+		function isAttributeExists($attribute_value,$attribute_id,$value_id)
+			{
+
+				$strSQLQuery ="select value_id from attribute_value where LCASE(attribute_value)='".strtolower(trim($attribute_value))."' and locationID=".$_SESSION['locationID'];
+
+				$strSQLQuery .= (!empty($attribute_id))?(" and attribute_id = '".$attribute_id."'"):("");
+				$strSQLQuery .= (!empty($value_id))?(" and value_id != '".$value_id."'"):("");
+				//echo $strSQLQuery; exit;
+				$arryRow = $this->query($strSQLQuery, 1);
+				if (!empty($arryRow[0]['value_id'])) {
+					return true;
+				} else {
+					return false;
+				}
+		}
+
+
+		////////////Attribute Management End ///// 
+		function  GetSubDepartment($Division)
+		{
+			if(!empty($Division)) $addsql .= " and Division in (".$Division.")";
+			if(!empty($_SESSION['CmpDepartment'])) $addsql .= " and Division in (".$_SESSION['CmpDepartment'].")";
+			$sql = "select depID,Department from h_department where Status=1 ".$addsql." order by depID asc";
+			return $this->query($sql, 1);
+
+		}
+		
+		function  GetDepartment()
+		{
+			if(!empty($_SESSION['CmpDepartment'])) $addsql = " and depID in (".$_SESSION['CmpDepartment'].")";
+			$sql = "select * from department where Status=1 ".$addsql." order by depID asc";
+			return $this->query($sql, 1);
+
+		}
+
+		function  GetDepartmentInfo($depID)
+		{
+			if(!empty($depID)) $addsql = " and d.depID='".$depID."' ";
+			$sql = "select d.*,e.EmpID, e.UserName,e.Email from department d left outer join h_employee e on (d.depID=e.Department and e.DeptHead=1 and e.locationID=".$_SESSION['locationID'].") where 1 ".$addsql." order by d.Department asc ";
+			return $this->query($sql, 1);
+
+		}
+		
+		function  GetSubDepartmentInfo($depID)
+		{
+			if(!empty($depID)) $addsql = " and d.depID='".$depID."' ";
+			$sql = "select d.*,e.EmpID, e.UserName,e.Email from h_department d left outer join h_employee e on (d.depID=e.Department and e.DeptHead=1 and e.locationID=".$_SESSION['locationID'].") where 1 ".$addsql." order by d.depID asc ";
+			return $this->query($sql, 1);
+
+		}
+
+
+
+		function  GetCurrentDepartment($Link)
+		{		
+			global $Config;
+			$sql = "select d.* from department d where 1 ";
+			//if(!empty($Config['DeptFolder']))
+				$sql .= " and LCASE(d.Department)='".strtolower($Config['DeptFolder'])."'";
+
+			$rs = $this->query($sql);
+
+			if(empty($rs[0]["Department"])){
+				$sql1 = "select d.* from  admin_modules a1 inner join admin_modules a2 on a1.Parent=a2.ModuleID  inner join department d on a2.depID=d.depID where a1.Link='".$Link."'  and  d.Status=1 ";
+				$rs = $this->query($sql1);
+			
+				/*if(empty($rs[0]["Department"])){
+					$sql = "select d.*,Email from  admin_modules a1 inner join admin_modules a2 on a1.Parent=a2.ModuleID inner join admin_modules a3 on a2.Parent=a3.ModuleID inner join department d on a3.depID=d.depID left outer join  h_employee e on d.EmpID=e.EmpID where a1.Link='".$Link."' ";
+					$rs = $this->query($sql);
+					
+				}*/
+			}
+
+		
+			return $rs;
+
+		}
+
+
+
+
+		function GetDashboardIcon($depID,$Status=0,$Display=0)
+		{
+			$sql = " where 1";
+			$sql .= (!empty($depID))?(" and depID = '".$depID."'"):("");
+			$sql .= (!empty($Status) && $Status == 1)?(" and Status = '".$Status."'"):("");
+			$sql .= (!empty($Display) && $Display == 1)?(" and Display = '".$Display."'"):("");
+
+			$sql = "select * from dashboard_icon ".$sql." Order by Case When OrderBy>0 Then 0 Else 1 End,OrderBy,IconID" ; 
+			return $this->query($sql, 1);
+		}
+
+		function DashboardIcon($depID)
+		{
+			global $Config;
+
+
+			if($_SESSION['AdminType'] == "admin") {
+				$wheresql = " and i.`Default`=0 ";
+			}else{
+
+				$strSQLQuery = "select IconID from dashboard_icon where `Default`=1 and Status=1 and Display=1  ";
+				$rs = $this->query($strSQLQuery);
+				$DefaultIcon = '';
+				if(sizeof($rs)>0){
+					foreach($rs as $key=>$values){
+						$DefaultIcon .= $values['IconID'].',';
+					}
+					$DefaultIcon = rtrim($DefaultIcon,",");
+
+				}
+
+				if(!empty($DefaultIcon)){
+					$wheresql = " and (i.IconID in(".$DefaultIcon.") or i.IconID in( select distinct(i.IconID) from dashboard_icon i inner join permission p on i.ModuleID =p.ModuleID and i.EditPage<=p.ModifyLabel where p.UserID=".$_SESSION['UserID']."))";
+				}else{
+					$joinsql  = "inner join permission p on (i.ModuleID =p.ModuleID and i.EditPage<=p.ModifyLabel and p.UserID=".$_SESSION['UserID'].")";
+				}
+
+
+
+			}
+
+			$sql = "select i.* from dashboard_icon i ".$joinsql." where i.Status=1 and i.Display=1 and i.depID='".$depID."' ".$wheresql." Order by Case When i.OrderBy>0 Then 0 Else 1 End,i.OrderBy,i.IconID " ; 
+			return $this->query($sql, 1);
+		}
+
+
+
+		function updateDashboardSettings($arryDetails)
+		{
+			@extract($arryDetails);	
+
+			if($numModule>0){
+					$sql = "update dashboard_icon set Display='0' where depID = '".$Department."'"; 
+					$rs = $this->query($sql,0);
+					foreach($arryDetails['IconID'] as $IconID){
+			
+						if($IconID>0){
+							$sql = "update dashboard_icon set Display='1' where IconID = '".$IconID."'";
+							$rs = $this->query($sql,0);
+						}
+
+					}
+			}
+		
+				
+			return true;
+		}
+
+
+
+				
+
+
+
+
+		//////////// Location Start  ///// 
+		function GetLocation($id=0,$Status=0)
+		{
+			$sql = " where 1";
+			$sql .= (!empty($id))?(" and locationID = '".mysql_real_escape_string($id)."'"):("");
+			$sql .= (!empty($Status) && $Status == 1)?(" and Status = '".$Status."'"):("");
+
+			$sql = "select * from location ".$sql." order by locationID Asc" ; 
+			return $this->query($sql, 1);
+		}
+		function addLocation($arryDetails)
+		{
+			@extract($arryDetails);	
+
+			if(!empty($TimezonePlusMinus)) $Timezone = $TimezonePlusMinus.$Timezone;
+
+
+			$sql = "insert into location (Address, currency_id, country_id, state_id, city_id, Country, State, City, ZipCode, Status, Timezone) values('".addslashes($Address)."', '".addslashes($currency_id)."', '".addslashes($country_id)."', '".addslashes($state_id)."', '".addslashes($city_id)."', '".addslashes($Country)."', '".addslashes($State)."', '".addslashes($City)."', '".addslashes($ZipCode)."', '".$Status."', '".addslashes($Timezone)."')";
+		
+			$this->query($sql, 0);
+			$lastInsertId = $this->lastInsertId();
+			return $lastInsertId;
+
+		}
+		function updateLocation($arryDetails)
+		{
+			@extract($arryDetails);	
+			if(!empty($locationID)){
+				if(!empty($TimezonePlusMinus)) $Timezone = $TimezonePlusMinus.$Timezone;
+
+				$sql = "update location set Address='".addslashes($Address)."', currency_id = '".addslashes($currency_id)."', country_id = '".addslashes($country_id)."', state_id = '".addslashes($state_id)."', city_id = '".addslashes($city_id)."', Country = '".addslashes($Country)."', State = '".addslashes($State)."', City = '".addslashes($City)."', ZipCode = '".addslashes($ZipCode)."',Status = '".$Status."' , Timezone = '".addslashes($Timezone)."' where locationID = '".$locationID."'"; 
+				$rs = $this->query($sql,0);
+			}
+				
+			return true;
+
+		}
+
+		function updateGlobalLocation($arryDetails)
+		{
+
+			@extract($arryDetails);	
+
+			$WeekEndOffVal = implode(",",$WeekEndOff);
+
+			$locationID = mysql_real_escape_string($_SESSION['locationID']);
+			if(!empty($locationID)){
+
+				$sql = "update location set WorkingHourStart='".mysql_real_escape_string($WorkingHourStart)."', WorkingHourEnd = '".mysql_real_escape_string($WorkingHourEnd)."', OvertimeFrom = '".mysql_real_escape_string($OvertimeFrom)."', OvertimeRate = '".mysql_real_escape_string($OvertimeRate)."', HalfDayHour = '".mysql_real_escape_string($HalfDayHour)."', FullDayHour = '".mysql_real_escape_string($FullDayHour)."', MaxLeaveMonth = '".mysql_real_escape_string($MaxLeaveMonth)."', WeekStart = '".mysql_real_escape_string($WeekStart)."', WeekEnd = '".mysql_real_escape_string($WeekEnd)."',WeekEndOff = '".$WeekEndOffVal."' , SalaryDate = '".mysql_real_escape_string($SalaryDate)."', LableLeave = '".mysql_real_escape_string($LableLeave)."', LableHalfDay = '".mysql_real_escape_string($LableHalfDay)."', MaxShortLeave = '".mysql_real_escape_string($MaxShortLeave)."', Advance = '".mysql_real_escape_string($Advance)."', Loan = '".mysql_real_escape_string($Loan)."', Overtime = '".mysql_real_escape_string($Overtime)."', Bonus = '".mysql_real_escape_string($Bonus)."', SL_Coming = '".mysql_real_escape_string($SL_Coming)."', SL_Leaving = '".mysql_real_escape_string($SL_Leaving)."', SL_Deduct = '".mysql_real_escape_string($SL_Deduct)."'  where locationID = '".$locationID."'"; 
+				$rs = $this->query($sql,0);
+			}
+				
+			return true;
+
+		}
+
+		function changeLocationStatus($locationID)
+		{
+			if(!empty($locationID)){
+				$sql="select locationID,Status from location where locationID='".mysql_real_escape_string($locationID)."'";
+				$rs = $this->query($sql);
+				if(sizeof($rs))
+				{
+					if($rs[0]['Status']==1)
+						$Status=0;
+					else
+						$Status=1;
+						
+					$sql="update location set Status='$Status' where locationID='".mysql_real_escape_string($locationID)."' and locationID!=1 ";
+					$this->query($sql,0);
+				}
+			}
+
+			return true;
+
+		}
+
+		function deleteLocation($locationID)
+		{
+			if(!empty($locationID)){
+				$sql = "delete from location where locationID = '".mysql_real_escape_string($locationID)."' and locationID!=1 ";
+				$rs = $this->query($sql,0);
+			}
+
+			return true;
+
+		}
+
+		function isLocationExists($arryDetails)
+		{	
+				extract($arryDetails);
+
+				$strSQLQuery ="select locationID from location where country_id='".$country_id."' ";
+				
+				if((!empty($state_id))){
+					$strSQLQuery .= " and state_id = ".$state_id;
+				}else if((!empty($State))){
+					$strSQLQuery .= " and State = '".$State."'";
+				}
+				if((!empty($city_id))){
+					$strSQLQuery .= " and city_id = ".$city_id;
+				}else if((!empty($City))){
+					$strSQLQuery .= " and City = '".$City."'";
+				}
+
+				$strSQLQuery .= (!empty($locationID))?(" and locationID != '".$locationID."'"):("");
+				//echo $strSQLQuery; exit;
+				$arryRow = $this->query($strSQLQuery, 1);
+				if (!empty($arryRow[0]['locationID'])) {
+					return true;
+				} else {
+					return false;
+				}
+		}
+
+		function CountLocation()
+		{
+			$sql = "select count(locationID) as NumLocation from location" ; 
+			return $this->query($sql, 1);
+		}
+
+
+		function UpdatePrimaryLocation($arryDetails)
+		{
+			$sql = "select locationID from location order by locationID limit 1" ; 
+			$arryRow = $this->query($sql, 1);
+			
+			$arryDetails["Status"] = 1;
+			
+			if(!empty($arryRow[0]['locationID'])){
+				$arryDetails["locationID"] = $arryRow[0]['locationID'];
+				#$this->updateLocation($arryDetails);  // No need now as integrated inside the edit company
+				#$_SESSION['locationID'] = $arryRow[0]['locationID'];
+			}else{
+				$locationID = $this->addLocation($arryDetails);
+				#$_SESSION['locationID'] = $locationID;
+			}		
+				
+			return true;
+
+		}
+
+
+
+
+		// For Primary Location Updation
+
+		function UpdateLocationProfile($arryDetails){   
+			extract($arryDetails);
+			if(empty($locationID)) $locationID=1; // For Primary Location
+
+			$strSQLQuery = "update location set Address='".addslashes($Address)."', country_id = '".addslashes($country_id)."', state_id = '".addslashes($state_id)."', city_id = '".addslashes($city_id)."', Country = '".addslashes($Country)."', State = '".addslashes($State)."', City = '".addslashes($City)."', ZipCode='".addslashes($ZipCode)."'	where locationID='".$locationID."'"; 
+			$this->query($strSQLQuery, 0);
+			return 1;
+		}
+
+		function UpdateLocationCurrency($arryDetails){   
+			extract($arryDetails);
+			if(!empty($locationID) && !empty($currency_id)){
+				if(empty($locationID)) $locationID=1; // For Primary Location
+
+				$strSQLQuery = "update location set currency_id='".$currency_id."' where locationID='".$locationID."'"; 
+				$this->query($strSQLQuery, 0);
+			}
+
+			return 1;
+		}
+
+		function UpdateLocationDateTime($arryDetails){   
+			extract($arryDetails);
+			if(!empty($locationID) && !empty($Timezone)){
+				if(empty($locationID)) $locationID=1; // For Primary Location
+
+				if(!empty($Timezone)) $Timezone = $TimezonePlusMinus.$Timezone;
+
+				$strSQLQuery = "update location set Timezone='".addslashes($Timezone)."' where locationID=".$locationID; 
+				$this->query($strSQLQuery, 0);
+			}
+			return 1;
+		}
+
+
+		//////////// Company Location End ///// 
+
+		function UpdateLoginTime()
+		{
+			global $Config;
+			if(!empty($_SESSION['AdminID'])){
+				$sql = "select LastLogin,CurrentLogin from h_employee where EmpID='".mysql_real_escape_string($_SESSION['AdminID'])."'"; 
+				$arryRow = $this->query($sql, 1);
+
+				$sql = "update h_employee set CurrentLogin='".$Config['TodayDate']."',LastLogin='".$arryRow[0]['CurrentLogin']."' where EmpID='".mysql_real_escape_string($_SESSION['AdminID'])."'"; 
+				$this->query($sql,0);
+			}
+		
+			return true;
+
+		}
+
+		//////////// Custom Field Start ///// 
+		function GetCustomField($id=0,$locationID,$depID,$Module,$Status=0)
+		{
+			$sql = " where 1 ";
+			$sql .= (!empty($depID))?(" and depID = '".$depID."'"):("");
+			$sql .= (!empty($Module))?(" and Module = '".$Module."'"):("");
+			$sql .= (!empty($id))?(" and FieldID = '".$id."'"):(" and locationID='".$locationID."'");
+			$sql .= (!empty($Status) && $Status == 1)?(" and Status = '".$Status."'"):("");
+
+			$sql = "select * from custom_field ".$sql." order by OrderBy Asc" ; 
+			return $this->query($sql, 1);
+		}
+
+		function CustomValueByParent($locationID,$Parent)
+		{
+			$sql = " where 1 ";
+			$sql .= (!empty($Parent))?(" and Parent = '".$Parent."'"):("");
+			$sql .= (!empty($locationID))?(" and locationID = '".$locationID."'"):("");
+
+			$sql = "select * from custom_field ".$sql." order by OrderBy Asc" ; 
+			return $this->query($sql, 1);
+		}		
+		
+		function GetCustomFieldModule($depID)
+		{
+			$sql = "select Module from custom_field where depID='".$depID."' group by Module order by Module Asc "; 
+			return $this->query($sql, 1);
+		}
+
+		function GetFieldByID($FieldID)
+		{
+			$sql = "select * from custom_field where FieldID='".$FieldID."'"; 
+			return $this->query($sql, 1);
+		}	
+
+		function updateCustomFieldValue($arryDetails)
+		{
+			for($i=1;$i<=$arryDetails['NumField'];$i++){
+				
+				if(!empty($arryDetails['FieldID'.$i])){ 
+					$Status = (!empty($arryDetails['FieldTitle'.$i]))?($arryDetails['Status'.$i]):('0');
+					$sql = "update custom_field set FieldTitle='".addslashes($arryDetails['FieldTitle'.$i])."', Status='".$Status."'  where FieldID=".$arryDetails['FieldID'.$i]; 
+					$this->query($sql, 0);	
+				}else if(!empty($arryDetails['MainFieldID'.$i])){ 
+					$arryField = $this->GetFieldByID($arryDetails['MainFieldID'.$i]);
+					
+					if(!empty($arryDetails['FieldTitle'.$i])){
+						$sql = "insert into custom_field(Parent, locationID, FieldTitle, Status) values( '".$arryDetails['MainFieldID'.$i]."', '".$_SESSION['locationID']."',  '".addslashes($arryDetails['FieldTitle'.$i])."', '".$arryDetails['Status'.$i]."')";
+						$this->query($sql, 0);
+					}
+
+				}
+				
+				
+			}
+			return true;
+		}
+
+
+		function CustomFieldList($depID,$Module,$Tab)
+		{
+			$addsql .= (!empty($Tab))?(" and f1.Tab = '".$Tab."'"):("");
+
+			if($_SESSION['locationID']==1){
+				$sql = "select f1.FieldTitle,f1.FieldName from custom_field f1 where f1.locationID='1' and f1.Status='1' and f1.depID = ".$depID." and f1.Module = '".$Module."' ".$addsql." order by f1.OrderBy Asc" ; 
+			}else{
+				$sql = "select f1.FieldTitle,f2.FieldName from custom_field f1 inner join custom_field f2 on f1.Parent=f2.FieldID where f1.locationID='".$_SESSION['locationID']."' and f1.Status='1' and f2.depID = ".$depID." and f2.Module = '".$Module."' ".$addsql." order by f2.OrderBy Asc" ; 
+			}
+			return $this->query($sql, 1);
+		}
+
+		//////////// Custom Field End ///// 
+
+
+
+		//////////// Notification Start ////////////// 
+		////////////////////////////////////////////// 
+		function GetNotification($notifyID,$Limit)
+		{   global $Config;
+			$addsql = (!empty($notifyID))?(" and notifyID = '".$notifyID."'"):("");
+			$Limit = (!empty($Limit))?(" limit 0, ".$Limit):("");
+			$sql = "select * from notification where locationID = '".$_SESSION['locationID']."' and depID = '".$Config['CurrentDepID']."' ".$addsql." order by notifyDate desc ".$Limit; 
+			return $this->query($sql, 1);
+		}
+
+		function CountNotification()
+		{   global $Config;
+			$sql = "select count(notifyID) as UnreadNotification from notification where locationID = '".$_SESSION['locationID']."' and depID = '".$Config['CurrentDepID']."'  and `Read`='0'";
+			$arryRow = $this->query($sql, 1);
+			return $arryRow[0]['UnreadNotification'];
+		}
+
+
+		function AddNotification($arryDetails)
+		{  			
+			global $Config;
+			extract($arryDetails);
+
+			if($_SESSION['AdminType'] == 'admin'){
+				$CreatedBy = 'Administrator';
+			}else{
+				$CreatedBy = $_SESSION['UserName'];
+			}
+
+			$strSQLQuery = "insert into notification(locationID, depID, refID, refType, Name, Message, oldValue, newValue, AdminID, AdminType, CreatedBy, notifyDate) values(  '".$_SESSION['locationID']."', '".$Config['CurrentDepID']."', '".mysql_real_escape_string($refID)."', '".mysql_real_escape_string($refType)."' , '".mysql_real_escape_string($Name)."', '".mysql_real_escape_string($Message)."', '".mysql_real_escape_string($oldValue)."', '".mysql_real_escape_string($newValue)."', '".$_SESSION['AdminID']."', '".$_SESSION['AdminType']."',  '".$CreatedBy."',  '".$Config['TodayDate']."')";
+
+			$this->query($strSQLQuery, 0);
+
+
+			$htmlPrefix = "../".$Config['EmailTemplateFolder'];
+			$contents = file_get_contents($htmlPrefix."notification.htm");
+			$CompanyUrl = $Config['Url'].$_SESSION['DisplayName'].'/admin/';
+
+			$contents = str_replace("[URL]",$Config['Url'],$contents);
+			$contents = str_replace("[SITENAME]",$Config['SiteName'],$contents);
+			$contents = str_replace("[FOOTER_MESSAGE]",$Config['MailFooter'],$contents);
+			$contents = str_replace("[FULLNAME]",$UserName, $contents);
+			$contents = str_replace("[Message]",strip_tags($Message),$contents);
+			$contents = str_replace("[COMPNAY_URL]",$CompanyUrl, $contents);
+
+			$mail = new MyMailer();
+			$mail->IsMail();			
+			$mail->AddAddress($Config['AdminEmail']);
+			$mail->sender($Config['SiteName'], $Config['AdminEmail']);   
+			$mail->Subject = $Config['SiteName']." - ".$subject;
+			$mail->IsHTML(true);
+			#echo $Config['AdminEmail'].$contents; exit;
+			$mail->Body = $contents;    
+			if($Config['Online'] == '1'){
+				$mail->Send();	
+			}
+
+			return true;
+
+		}
+
+
+		function RemoveNotification($notifyID){
+			if(!empty($notifyID)){
+				$sql = "delete from notification where notifyID = '".mysql_real_escape_string($notifyID)."'";
+				$this->query($sql, 0);			
+			}
+			return 1;
+		}
+
+		function ReadNotification($notifyID)
+		{
+			global $Config;
+			$addsql = (!empty($notifyID))?(" and notifyID = '".$notifyID."'"):("");
+
+			$sql = "update notification set `Read`='1' where locationID = '".$_SESSION['locationID']."' and depID = '".$Config['CurrentDepID']."' and `Read`='0' ".$addsql; 
+			$rs = $this->query($sql,0);
+
+			return true;
+		}
+
+
+
+		//////////// Notification End ///// 
+
+
+
+
+
+
+
+
+}
+
+?>

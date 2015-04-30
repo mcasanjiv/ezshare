@@ -1,0 +1,36 @@
+<? 
+		 if($_SESSION['AdminType']=="employee" && $ThisPageName!='dashboard.php' && $ThisPageName!='home.php' && $HideNavigation!='1' && !in_array($ModuleParentID,$AllowedModules)){
+
+				$arryPermitted = $objConfig->isModulePermittedUser($ModuleParentID,$_SESSION['UserID']);
+				if($arryPermitted[0]['ModifyLabel']==1){
+					/*****************/
+					/*****************/
+					$ModifyLabel = 1; 
+					/*****************/
+					/*****************/
+				}
+				if(empty($arryPermitted[0]['UserID'])) {
+					$NotAllowed = 1;
+				}
+		 }
+
+
+		if($_SESSION['AdminType']=="employee" && $EditPage==1 && $ModifyLabel!=1){ 
+			$NotAllowed =1;
+		}
+echo $NotAllowed;
+		if($_SESSION['AdminType'] == "admin" && $DefaultModule==1) {
+			$NotAllowed =1;
+		}
+
+		
+		if($NotAllowed == 1){
+			echo '<div align="center" class="redmsg" style="padding-top:200px;">'.ERROR_NOT_AUTH.'</div>';
+			exit;
+		}
+
+		if($_SESSION['AdminType'] == "admin") {
+			$ModifyLabel=1;
+		}
+
+?>

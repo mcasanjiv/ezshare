@@ -1,0 +1,164 @@
+<?php 
+	require_once("includes/header.php");
+	require_once("../classes/company.class.php");
+	require_once("../classes/region.class.php");
+	
+	$ModuleName = "Company";
+	$RedirectURL = "viewCompany.php?curP=".$_GET['curP'];
+	if(empty($_GET['tab'])) $_GET['tab']="company";
+
+	$EditUrl = "editCompany.php?edit=".$_GET["edit"]."&curP=".$_GET["curP"]."&tab="; 
+	$ActionUrl = $EditUrl.$_GET["tab"];
+
+
+	$objCompany=new company();
+	$objRegion=new region();
+	
+	/*********  Multiple Actions To Perform **********/
+	 if(!empty($_GET['multiple_action_id'])){
+	 	$multiple_action_id = rtrim($_GET['multiple_action_id'],",");
+		
+		$mulArray = explode(",",$multiple_action_id);
+	
+		switch($_GET['multipleAction']){
+			case 'delete':
+					foreach($mulArray as $del_id){
+						$objCompany->RemoveCompany($del_id);
+					}
+					$_SESSION['mess_company'] = COMPANY_REMOVED;
+					break;
+			case 'active':
+					$objCompany->MultipleCompanyStatus($multiple_action_id,1);
+					$_SESSION['mess_company'] = COMPANY_STATUS_CHANGED;
+					break;
+			case 'inactive':
+					$objCompany->MultipleCompanyStatus($multiple_action_id,0);
+					$_SESSION['mess_company'] = COMPANY_STATUS_CHANGED;
+					break;				
+		}
+		header("location: ".$RedirectURL);
+		exit;
+		
+	 }
+	
+	/*********  End Multiple Actions **********/	
+	
+	
+
+	 if($_GET['del_id'] && !empty($_GET['del_id'])){
+		$_SESSION['mess_company'] = COMPANY_REMOVED;
+		$objCompany->RemoveCompany($_REQUEST['del_id']);
+		header("Location:".$RedirectURL);
+	}
+	
+
+	 if($_GET['active_id'] && !empty($_GET['active_id'])){
+		$_SESSION['mess_company'] = COMPANY_STATUS_CHANGED;
+		$objCompany->changeCompanyStatus($_REQUEST['active_id']);
+		header("Location:".$RedirectURL);
+	}
+	
+
+	
+	 if ($_POST){	
+
+			 if (empty($_POST['Email']) && empty($_POST['CmpID'])) {
+				$errMsg = ENTER_EMAIL;
+			 } else {
+				if (!empty($_POST['CmpID'])) {
+					$ImageId = $_POST['CmpID'];
+					/*
+					$objCompany->UpdateCompany($_POST);
+					$_SESSION['mess_company'] = COMPANY_UPDATED;
+					*/
+					/***************************/
+					switch($_GET['tab']){
+						case 'company':
+							$objCompany->UpdateCompanyProfile($_POST);
+							$_SESSION['mess_company'] = COMPANY_PROFILE_UPDATED;
+							break;
+						case 'account':
+							$objCompany->UpdateAccount($_POST);
+							$_SESSION['mess_company'] = ACCOUNT_UPDATED;
+							break;
+						case 'permission':
+							$objCompany->UpdatePermission($_POST);
+							$_SESSION['mess_company'] = PERMISSION_UPDATED;
+							break;
+						case 'currency':
+							$objCompany->UpdateCurrency($_POST);
+							$_SESSION['mess_company'] = CURRENCY_UPDATED;
+							break;
+						case 'DateTime':
+							$objCompany->UpdateDateTime($_POST);
+							$_SESSION['mess_company'] = DATETIME_UPDATED;
+							break;
+					}
+					/***************************/
+				} else {	
+					if($objCompany->isEmailExists($_POST['Email'],'')){
+						$_SESSION['mess_company'] = EMAIL_ALREADY_REGISTERED;
+					}else if($objCompany->isDisplayNameExists($_POST['DisplayName'],'')){
+						$_SESSION['mess_company'] = DISPLAY_ALREADY_REGISTERED;
+					}else{	
+						$ImageId = $objCompany->AddCompany($_POST); 
+						$_SESSION['mess_company'] = COMPANY_ADDED;	
+						$AddDatabase = 1;
+					}
+				}
+				
+				$_POST['CmpID'] = $ImageId;
+
+				if($_FILES['Image']['name'] != ''){
+					$ImageExtension = GetExtension($_FILES['Image']['name']); 
+					$imageName = $ImageId.".".$ImageExtension;	
+					$ImageDestination = "../upload/company/".$imageName;
+					if(@move_uploaded_file($_FILES['Image']['tmp_name'], $ImageDestination)){
+						$objCompany->UpdateImage($imageName,$ImageId);
+					}
+				}
+
+
+				/************************/
+				if($AddDatabase == 1){
+					$DbName = $objCompany->AddDatabse($_POST['DisplayName']); 
+					if(!empty($DbName)){
+						ImportDatabase($Config['DbHost'],$DbName,$Config['DbUser'],$Config['DbPassword'],'sql/erp_company.sql');
+					}
+				}
+				/************************/
+
+
+				if (!empty($_GET['edit'])) {
+					header("Location:".$ActionUrl);
+					exit;
+				}else{
+					header("Location:".$RedirectURL);
+					exit;
+				}
+
+
+				
+			}
+		}
+		
+
+	if (!empty($_GET['edit'])) {
+		$arryCompany = $objCompany->GetCompany($_GET['edit'],'');
+		$CmpID   = $_REQUEST['edit'];			
+	}
+				
+	if($arryCompany[0]['Status'] != ''){
+		$CompanyStatus = $arryCompany[0]['Status'];
+	}else{
+		$CompanyStatus = 1;
+	}
+		
+	$arrayDateFormat = $objConfig->GetDateFormat();
+	$arryDepartment = $objConfig->GetDepartment();
+	$arryCountry = $objRegion->getCountry('','');
+	$arryCurrency = $objRegion->getCurrency('',1);
+	require_once("includes/footer.php"); 
+?>
+
+

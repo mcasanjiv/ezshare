@@ -1,0 +1,409 @@
+<script language="JavaScript1.2" type="text/javascript">
+function ShowOther(FieldId){
+	if(document.getElementById(FieldId).value=='Other'){
+		document.getElementById(FieldId+'Span').style.display = 'inline'; 
+	}else{
+		document.getElementById(FieldId+'Span').style.display = 'none'; 
+	}
+}
+</script>
+<table width="100%" border="0" cellpadding="5" cellspacing="0" >
+<tr>
+       		 <td colspan="2" align="left" class="head">Account Details</td>
+        </tr>	  
+
+    
+  
+
+      <tr>
+        <td  align="right"   class="blackbold" width="35%">Email :<span class="red">*</span> </td>
+        <td  height="30" align="left" ><input name="Email" type="text" class="inputbox" id="Email" value="<?php echo $arryEmployee[0]['Email']; ?>" size="30" maxlength="80" onKeyPress="Javascript:ClearAvail('MsgSpan_Email');" onBlur="Javascript:CheckAvail('MsgSpan_Email','Employee','<?=$_GET['edit']?>');"/>
+		
+	 <span id="MsgSpan_Email"></span>		</td>
+      </tr>
+        <tr <?  if($_GET['edit']>0) echo 'Style="display:none"'; ?>>
+        <td  align="right"   class="blackbold">Password :<span class="red">*</span> </td>
+        <td  height="30" align="left" ><input name="Password" type="Password" class="inputbox" id="Password" value="<?php echo stripslashes($arryEmployee[0]['Password']); ?>" size="30" maxlength="15" />          <span class="blacknormal" ><?=$MSG[150]?> </span></td>
+      </tr>		 
+	  
+	  <? if($arryEmployee[0]['JoiningDate'] > 0){?>
+      <tr>
+        <td align="right"   class="blackbold">Joining Date  :</td>
+        <td height="30" align="left"  class="red"><? echo $arryEmployee[0]['JoiningDate']; ?>
+		
+		<? echo date("j F, Y", strtotime($arryEmployee[0]['JoiningDate'])) ?>
+		</td>
+      </tr>
+	  <? } ?>
+     
+
+      <!--<tr <?  if($arryEmployee[0]['ExpiryDate'] <= 0) echo 'Style="display:none"'; ?>>
+        <td align="right"   class="blackbold">Expiry Date  :<span class="red">*</span></td>
+        <td height="30" align="left"  class="red">
+		<? 	$ExpiryDate = $arryEmployee[0]['ExpiryDate']; 
+			if($ExpiryDate < 1) $ExpiryDate = '';
+			echo calender_picker($ExpiryDate,'ExpiryDate');?>	
+				</td>
+      </tr>-->
+  
+     
+
+<tr <? if(empty($_GET['edit'])) echo 'Style="display:none"'; ?>>
+        <td  align="right"   class="blackbold" 
+		>Status  : </td>
+        <td  height="30" align="left"  ><span class="blacknormal">
+          <? 
+		  	 $ActiveChecked = ' checked';
+			 if($_REQUEST['edit'] > 0){
+				 if($arryEmployee[0]['Status'] == 1) {$ActiveChecked = ' checked'; $InActiveChecked ='';}
+				 if($arryEmployee[0]['Status'] == 0) {$ActiveChecked = ''; $InActiveChecked = ' checked';}
+			}
+		  ?>
+          <input type="radio" name="Status" id="Status" value="1" <?=$ActiveChecked?> />
+          Active&nbsp;&nbsp;&nbsp;&nbsp;
+          <input type="radio" name="Status" id="Status" value="0" <?=$InActiveChecked?> />
+          InActive </span></td>
+      </tr>
+
+	  
+
+	<tr>
+       		 <td colspan="2" align="left"   class="head">Contact Details</td>
+        </tr>
+   <tr>
+        <td  align="right"   class="blackbold"> First Name  :<span class="red">*</span> </td>
+        <td  height="30" align="left" >
+<input name="FirstName" type="text" class="inputbox" id="FirstName" value="<?php echo stripslashes($arryEmployee[0]['FirstName']); ?>" size="30" maxlength="50" />            </td>
+      </tr>
+
+	   <tr>
+        <td  align="right"   class="blackbold"> Last Name  :<span class="red">*</span> </td>
+        <td  height="30" align="left" >
+<input name="LastName" type="text" class="inputbox" id="LastName" value="<?php echo stripslashes($arryEmployee[0]['LastName']); ?>" size="30" maxlength="50" />            </td>
+      </tr>
+	<tr>
+        <td  align="right"   > Date of Birth :
+		<?php
+			 //echo $arryEmployee[0]['date_of_birth'];
+			 list($dob_yr,$dob_month,$dob_date)=explode('-',$arryEmployee[0]['date_of_birth']);
+			  
+		 ?>
+		 <span class="red">*</span> </td>
+        <td   align="left" >
+		 <select name="dob_date" style="width:62px;" class="inputbox">
+		    <option value="DD" selected="selected">DD</option><option value="01" <?php if($dob_date=="01"){echo "selected";} ?>>01</option><option value="02" <?php if($dob_date=="02"){echo "selected";} ?>>02</option><option value="03" <?php if($dob_date=="03"){echo "selected";} ?>>03</option><option value="04" <?php if($dob_date=="04"){echo "selected";} ?>>04</option><option value="05" <?php if($dob_date=="05"){echo "selected";} ?>>05</option><option value="06" <?php if($dob_date=="06"){echo "selected";} ?>>06</option><option value="07" <?php if($dob_date=="07"){echo "selected";} ?>>07</option><option value="08" <?php if($dob_date=="08"){echo "selected";}?>>08</option><option value="09" <?php if($dob_date=="09"){echo "selected";}?>>09</option>
+			<option value="10 " <?php if($dob_date=="10"){echo "selected";} ?>>10</option><option value="11" <?php if($dob_date=="11"){echo "selected";} ?>>11</option><option value="12" <?php if($dob_date=="12"){echo "selected";} ?>>12</option><option value="13" <?php if($dob_date=="13"){echo "selected";} ?>>13</option><option value="14" <?php if($dob_date=="14"){echo "selected";} ?>>14</option><option value="15" <?php if($dob_date=="15"){echo "selected";} ?>>15</option><option value="16" <?php if($dob_date=="16"){echo "selected";} ?>>16</option><option value="17" <?php if($dob_date=="17"){echo "selected";} ?>>17</option><option value="18" <?php if($dob_date=="18"){echo "selected";} ?>>18</option><option value="19" <?php if($dob_date=="19"){echo "selected";} ?>>19</option><option value="20" <?php if($dob_date=="20"){echo "selected";} ?>>20</option>
+			<option value="21" <?php if($dob_date=="21"){echo "selected";} ?>>21</option><option value="22" <?php if($dob_date=="22"){echo "selected";} ?>>22</option><option value="23" <?php if($dob_date=="23"){echo "selected";} ?>>23</option><option value="24" <?php if($dob_date=="24"){echo "selected";} ?>>24</option><option value="25" <?php if($dob_date=="25"){echo "selected";} ?>>25</option><option value="26" <?php if($dob_date=="26"){echo "selected";} ?>>26</option><option value="27" <?php if($dob_date=="27"){echo "selected";} ?>>27</option><option value="28" <?php if($dob_date=="28"){echo "selected";} ?>>28</option><option value="29" <?php if($dob_date=="29"){echo "selected";} ?>>29</option><option value="30" <?php if($dob_date=="30"){echo "selected";} ?>>30</option><option value="31" <?php if($dob_date=="31"){echo "selected";} ?>>31</option>
+		 </select>
+		 <select name="dob_month" style="width:62px;" class="inputbox">
+		    <option value="mm" selected="selected" >MM</option><option value="01" <?php if($dob_month=="01"){echo "selected";} ?>>Jan</option><option value="02" <?php if($dob_month=="02"){echo "selected";} ?>>Feb</option><option value="03" <?php if($dob_month=="03"){echo "selected";} ?>>Mar</option><option value="04" <?php if($dob_month=="04"){echo "selected";} ?>>Apr</option><option value="05" <?php if($dob_month=="05"){echo "selected";} ?>>May</option><option value="06" <?php if($dob_month=="06"){echo "selected";} ?>>Jun</option><option value="07" <?php if($dob_month=="07"){echo "selected";} ?>>July</option><option value="08" <?php if($dob_month=="08"){echo "selected";} ?>>Aug</option><option value="09" <?php if($dob_month=="09"){echo "selected";} ?>>Sep</option>
+			<option value="10" <?php if($dob_month=="10"){echo "selected";} ?>>Oct</option><option value="11" <?php if($dob_month=="11"){echo "selected";} ?>>Nov</option><option value="12" <?php if($dob_month=="12"){echo "selected";} ?>>Dec</option>
+		 </select>
+		 <select name="dob_yr" style="width:62px;" class="inputbox">
+		    <option value="yy">YYYY</option>
+			 <?php  $datee=date('Y')-10; ?>
+			<?php for ($yy=1950;$yy <=$datee;$yy++)
+			{?>
+			<option value="<? echo $yy; ?>" <?php if($dob_yr==$yy){ echo "selected";} ?>><? echo $yy; ?></option>
+			<?php }?>
+		 </select>
+         </td>
+      </tr>
+	  
+	    <tr>
+        <td align="right"   class="blackbold">Alternate Email  : </td>
+        <td height="30" align="left" ><input name="AlternateEmail" type="text" class="inputbox" id="AlternateEmail" value="<?php echo $arryEmployee[0]['AlternateEmail']; ?>" size="30" maxlength="70" /> </td>
+      </tr> 
+	 
+	
+	  
+        <tr>
+          <td align="right"   class="blackbold" valign="top">Contact Address  :</td>
+          <td height="30" align="left" >
+            <textarea name="Address" type="text" class="textbox" id="Address"><?=stripslashes($arryEmployee[0]['Address'])?></textarea>
+			          </td>
+        </tr>
+         
+	<tr <?=$Config['CountryDisplay']?>>
+        <td  align="right"   class="blackbold"> Country  :</td>
+        <td  height="30" align="left" >
+		<?
+	if($arryEmployee[0]['country_id'] != ''){
+		$CountrySelected = $arryEmployee[0]['country_id']; 
+	}else{
+		$CountrySelected = 106;
+	}
+	?>
+            <select name="country_id" class="inputbox" id="country_id" style="width: 200px;" onChange="Javascript: StateListSend();">
+             
+              <? for($i=0;$i<sizeof($arryCountry);$i++) {?>
+              <option value="<?=$arryCountry[$i]['country_id']?>" <?  if($arryCountry[$i]['country_id']==$CountrySelected){echo "selected";}?>>
+              <?=$arryCountry[$i]['name']?>
+              </option>
+              <? } ?>
+            </select>        </td>
+      </tr>
+     <tr>
+	  <td  align="right" valign="middle" nowrap="nowrap"  class="blackbold"> State  :</td>
+	  <td  align="left" id="state_td" class="blacknormal">&nbsp;</td>
+	</tr>
+	    <tr>
+        <td  align="right"   class="blackbold"> <div id="StateTitleDiv">Other State  :</div> </td>
+        <td   align="left" ><div id="StateValueDiv"><input name="OtherState" type="text" class="inputbox" id="OtherState" value="<?php echo $arryEmployee[0]['OtherState']; ?>" size="30" maxlength="30" /> </div>           </td>
+      </tr>
+     
+	   <tr>
+        <td  align="right"   class="blackbold"><div id="MainCityTitleDiv"> City   :</div></td>
+        <td  align="left"  ><div id="city_td"></div></td>
+      </tr> 
+	     <tr>
+        <td  align="right"   class="blackbold"><div id="CityTitleDiv"> Other City :</div>  </td>
+        <td align="left" ><div id="CityValueDiv"><input name="OtherCity" type="text" class="inputbox" id="OtherCity" value="<?php echo $arryEmployee[0]['OtherCity']; ?>" size="30" maxlength="30" />  </div>          </td>
+      </tr>
+	 
+	  
+	  
+       <tr>
+        <td align="right"   class="blackbold" >Mobile  :<span class="red">*</span></td>
+        <td height="30" align="left"  >
+	 <input name="Phone" type="text" class="inputbox" id="Phone" value="<?=stripslashes($arryEmployee[0]['Phone'])?>"   size="30"  maxlength="20" />
+			</td>
+      </tr>
+
+	   <tr>
+        <td  align="right"   class="blackbold">Landline  :</td>
+        <td  height="30" align="left" >
+		<?
+		if(!empty($arryEmployee[0]['LandlineNumber'])){
+			$LandArray = explode(" ",$arryEmployee[0]['LandlineNumber']);
+	    }
+		?>
+		<input name="Landline1" type="text" class="inputbox" id="Landline1" value="<?=$LandArray[0]?>" size="3" maxlength="4" />&nbsp;&nbsp;
+		<input name="Landline2" type="text" class="inputbox" id="Landline2" value="<?=$LandArray[1]?>" size="3" maxlength="4" />&nbsp;&nbsp;
+		<input name="Landline3" type="text" class="inputbox" id="Landline3" value="<?=$LandArray[2]?>" size="8" maxlength="8" />		</td>
+      </tr>
+
+		
+<tr>
+       		 <td colspan="2" align="left"   class="head">Professional Details</td>
+        </tr>	  
+		
+	  <tr>
+        <td align="right"   class="blackbold" >
+		Total Experience  :<span class="red">*</span></td>
+        <td height="30" align="left" >
+		
+	<select name="ExperienceYear" class="inputbox" id="ExperienceYear" style="width:70px;">
+		<option value="">--Select--</option>
+		<option value="Fresher">Fresher</option>
+		<? for($i=0;$i<=30;$i++){ ?>
+		 <option value="<?=$i?>" <? if($arryEmployee[0]['ExperienceYear']!=''  && $arryEmployee[0]['ExperienceYear'] == $i) echo 'selected';?>> <?=$i?> </option>
+		<? } ?>	
+		<option value="30+" <? if($arryEmployee[0]['ExperienceYear'] == '30+') echo 'selected';?>> 30+ </option>	 
+     </select> Years &nbsp;&nbsp; 	
+		
+	<select name="ExperienceMonth" class="inputbox" id="ExperienceMonth" style="width:70px;">
+		<option value="">--Select--</option>
+		<? for($i=0;$i<=11;$i++){ ?>
+		 <option value="<?=$i?>" <? if($arryEmployee[0]['ExperienceMonth']!=''  && $arryEmployee[0]['ExperienceMonth'] == $i) echo 'selected';?>> <?=$i?> </option>
+		<? } ?>	
+     </select> Months	
+		
+		</td>
+	  </tr>	
+	  
+	  <tr>
+        <td align="right"   class="blackbold" >
+		Annual Salary  :<span class="red">*</span></td>
+        <td height="30" align="left" >
+		
+	<select name="SalaryLac" class="inputbox" id="SalaryLac" style="width:70px;">
+		<option value="">--Select--</option>
+		<? for($i=0;$i<=50;$i++){ ?>
+		 <option value="<?=$i?>" <? if($arryEmployee[0]['SalaryLac']!=''  && $arryEmployee[0]['SalaryLac'] == $i) echo 'selected';?>> <?=$i?> </option>
+		<? } ?>	
+		<option value="50+" <? if($arryEmployee[0]['SalaryLac'] == '50+') echo 'selected';?>> 50+ </option>	 
+     </select> Lacs  &nbsp;&nbsp;&nbsp;&nbsp;  	
+		
+	<select name="SalaryThousand" class="inputbox" id="SalaryThousand" style="width:70px;">
+		<option value="">--Select--</option>
+		<? for($i=0;$i<=95;$i=$i+5){ ?>
+		 <option value="<?=$i?>" <? if($arryEmployee[0]['SalaryThousand']!=''  && $arryEmployee[0]['SalaryThousand'] == $i) echo 'selected';?>> <?=$i?> </option>
+		<? } ?>	
+     </select> Thousands	
+		
+		</td>
+	  </tr>	  
+	  
+	  
+	   <tr>
+        <td align="right"   class="blackbold" >
+		Functional Area  :<span class="red">*</span></td>
+        <td height="30" align="left" >
+	 <input name="FunctionalArea" type="text" class="inputbox" id="FunctionalArea" value="<?=stripslashes($arryEmployee[0]['FunctionalArea'])?>"   size="30"  maxlength="40" />
+		
+		</td>
+      </tr>
+	  
+  <tr>
+        <td align="right"   class="blackbold" valign="top">
+		Key Skills  :<span class="red">*</span></td>
+    <td height="30" align="left" valign="top" >
+	
+	 <textarea name="Skill" type="text" class="textbox" id="Skill"><?=stripslashes($arryEmployee[0]['Skill'])?></textarea>
+	
+	</td>
+  </tr>	  
+	 
+	
+	<tr>
+       		 <td colspan="2" align="left"   class="head">Education Details</td>
+        </tr>	
+	
+	
+	  
+	 <tr>
+          <td align="right"   class="blackbold" valign="top"> Graduation  :<span class="red">*</span></td>
+          <td height="30" align="left" >
+		<select name="Graduation" class="inputbox" id="Graduation" style="width:200px;" onchange="Javascript:ShowOther('Graduation');">
+		<option value="">--- Select ---</option>
+		<? for($i=0;$i<sizeof($arryGraduation);$i++) {?>
+			<option value="<?=$arryGraduation[$i]['attribute_value']?>" <?  if($arryGraduation[$i]['attribute_value']==$arryEmployee[0]['Graduation']){echo "selected";}?>>
+			<?=$arryGraduation[$i]['attribute_value']?>
+			</option>
+		<? } ?>
+			<option value="Other" <?  if($arryEmployee[0]['Graduation']=="Other"){echo "selected";}?>>Other</option>
+	</select> 	  
+		  <span id="GraduationSpan">&nbsp;&nbsp;<input  name="OtherGraduation" id="OtherGraduation" value="<?=stripslashes($arryEmployee[0]['OtherGraduation'])?>" type="text" class="inputbox" style="width: 120px;" maxlength="30" /></span>
+		  <script language="javascript1.2">ShowOther('Graduation');</script>
+		  
+		  
+		  </td>
+  </tr>  
+	  
+	 <tr>
+          <td align="right"   class="blackbold" valign="top">Post Graduation  :</td>
+          <td height="30" align="left" >
+		  
+			<select name="PostGraduation" class="inputbox" id="PostGraduation" style="width:200px;" onchange="Javascript:ShowOther('PostGraduation');">
+		<option value="">--- Select ---</option>
+		<? for($i=0;$i<sizeof($arryPostGraduation);$i++) {?>
+			<option value="<?=$arryPostGraduation[$i]['attribute_value']?>" <?  if($arryPostGraduation[$i]['attribute_value']==$arryEmployee[0]['PostGraduation']){echo "selected";}?>>
+			<?=$arryPostGraduation[$i]['attribute_value']?>
+			</option>
+		<? } ?>
+			<option value="Other" <?  if($arryEmployee[0]['PostGraduation']=="Other"){echo "selected";}?>>Other</option>
+	</select> 	  
+		  <span id="PostGraduationSpan">&nbsp;&nbsp;<input  name="OtherPostGraduation" id="OtherPostGraduation" value="<?=stripslashes($arryEmployee[0]['OtherPostGraduation'])?>" type="text" class="inputbox" style="width: 120px;" maxlength="30" /></span>
+		  <script language="javascript1.2">ShowOther('PostGraduation');</script>
+		  
+		  </td>
+  </tr>  
+	  
+	
+	
+	    	
+     <tr>
+       <td height="30" align="right" valign="top"   class="blackbold"> Doctorate/Phd  : </td>
+       <td  align="left" valign="top" >
+		<select name="Doctorate" class="inputbox" id="Doctorate" style="width:200px;" onchange="Javascript:ShowOther('Doctorate');">
+		<option value="">--- Select ---</option>
+		<? for($i=0;$i<sizeof($arryDoctorate);$i++) {?>
+			<option value="<?=$arryDoctorate[$i]['attribute_value']?>" <?  if($arryDoctorate[$i]['attribute_value']==$arryEmployee[0]['Doctorate']){echo "selected";}?>>
+			<?=$arryDoctorate[$i]['attribute_value']?>
+			</option>
+		<? } ?>
+			<option value="Other" <?  if($arryEmployee[0]['Doctorate']=="Other"){echo "selected";}?>>Other</option>
+	</select> 	  
+		  <span id="DoctorateSpan">&nbsp;&nbsp;<input  name="OtherDoctorate" id="OtherDoctorate" value="<?=stripslashes($arryEmployee[0]['OtherDoctorate'])?>" type="text" class="inputbox" style="width: 120px;" maxlength="30" /></span>
+		  <script language="javascript1.2">ShowOther('Doctorate');</script>
+	   </td>
+     </tr>
+	<tr>
+        <td align="right"   class="blackbold" valign="top">
+		Certification Course  :</td>
+    <td height="30" align="left" valign="top" >
+	
+	 <textarea name="Certification" type="text" class="textbox" id="Certification"><?=stripslashes($arryEmployee[0]['Certification'])?></textarea>
+	
+	</td>
+  </tr>	 
+	 
+	 
+<tr>
+       		 <td colspan="2" align="left"   class="head">Manage Resume</td>
+        </tr>	
+	
+	 <tr>
+        <td align="right"   class="blackbold" >
+		Resume Title   :<span class="red">*</span> </td>
+       <td height="30" align="left" >
+	 <input name="ResumeTitle" type="text" class="inputbox" id="ResumeTitle" value="<?php echo stripslashes($arryEmployee[0]['ResumeTitle']); ?>" size="50" maxlength="80" />   
+	   
+	   </td>
+  </tr>	
+  
+  <tr>
+          <td align="right"   class="blackbold" valign="top"> Resume :</td>
+          <td height="30" align="left" >
+            <textarea name="ResumeContent" type="text" class="bigbox" id="ResumeContent" ><?=stripslashes($arryEmployee[0]['ResumeContent'])?></textarea>          </td>
+  </tr>
+  
+	 <tr>
+    <td height="30" align="right" valign="top"   class="blackbold"> Attach Resume   :</td>
+    <td  align="left" valign="top" class="blacknormal">
+	
+
+	
+	<input name="Resume" type="file" class="inputbox" id="Resume" size="19" onkeypress="javascript: return false;" onkeydown="javascript: return false;" oncontextmenu="return false" ondragstart="return false" onselectstart="return false"><br>
+	
+	<? if($arryEmployee[0]['Resume'] !='' && file_exists('../upload/resume/'.$arryEmployee[0]['Resume']) ){ ?>
+	<div id="ResumeDiv">
+	<a href="../upload/resume/<?=$arryEmployee[0]['Resume']?>" target="_blank"  title="<?=$arryEmployee[0]['CompanyName']?>">View Resume</a>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<a href="Javascript:void(0);" onclick="Javascript:DeleteFile('../upload/resume/<?=$arryEmployee[0]['Resume']?>','ResumeDiv')">Delete Resume</a>
+	</div>
+<?	} ?>
+	
+
+	
+		
+	
+	</td>
+  </tr>
+
+
+
+<tr>
+       		 <td colspan="2" align="left"   class="head">Manage Photo</td>
+  </tr>
+<tr>
+    <td height="30" align="right" valign="top"   class="blackbold"> Upload Photo  :</td>
+    <td  align="left" valign="top" class="blacknormal">
+	
+<? if($arryEmployee[0]['Image'] !='' && file_exists('../upload/employee/'.$arryEmployee[0]['Image']) ){ ?>
+				
+	<div style="float:right; padding-right:5px;" id="ImageDiv"><a href="../upload/employee/<?=$arryEmployee[0]['Image']?>" rel="lightbox" title="<?=$arryEmployee[0]['UserName']?>"><? echo '<img src="../resizeimage.php?w=70&h=70&img=upload/employee/'.$arryEmployee[0]['Image'].'" border=0 >';?></a>
+	
+	<br><a href="Javascript:void(0);" onclick="Javascript:DeleteFile('../upload/employee/<?=$arryEmployee[0]['Image']?>','ImageDiv')">Delete Photo</a>
+	
+	</div>
+<?	} ?>	
+	
+	<input name="Image" type="file" class="inputbox" id="Image" size="19" onkeypress="javascript: return false;" onkeydown="javascript: return false;" oncontextmenu="return false" ondragstart="return false" onselectstart="return false"><br>
+	<?=$MSG[201]?>
+	
+		
+	
+	</td>
+  </tr>	  
+		
+			 
+ 
+
+
+
+</table>	
+  
+
+

@@ -1,0 +1,2253 @@
+<?
+function CountSubString($Arry,$sub){ 
+	$c=0;
+
+	//echo $sub; print_r($Arry);exit;
+
+	if(is_array($Arry)){
+		foreach($Arry as $value){
+			if($value==$sub) $c++;
+		}
+	}
+	return $c;
+}
+
+function html2rgb($color){ 
+		if ($color[0] == '#')        $color = substr($color, 1);    if (strlen($color) == 6)        list($r, $g, $b) = array($color[0].$color[1],                                 $color[2].$color[3],                                 $color[4].$color[5]);    elseif (strlen($color) == 3)        list($r, $g, $b) = array($color[0], $color[1], $color[2]);    else        return false;    $r = hexdec($r); $g = hexdec($g); $b = hexdec($b);    return array($r, $g, $b);
+}
+
+function sortMultiArrayByKey($argArray, $argKey, $argOrder=SORT_ASC){
+    foreach ($argArray as $key => $row){
+       $key_arr[$key] = trim($row[$argKey]);
+    }
+    array_multisort($key_arr, $argOrder, $argArray);
+    return $argArray;
+ }
+
+
+function array_sort($array, $on, $order=SORT_ASC)
+{
+    $new_array = array();
+    $sortable_array = array();
+
+    if (count($array) > 0) {
+        foreach ($array as $k => $v) {
+            if (is_array($v)) {
+                foreach ($v as $k2 => $v2) {
+                    if ($k2 == $on) {
+                        $sortable_array[$k] = $v2;
+                    }
+                }
+            } else {
+                $sortable_array[$k] = $v;
+            }
+        }
+
+        switch ($order) {
+            case SORT_ASC:
+                asort($sortable_array);
+            break;
+            case SORT_DESC:
+                arsort($sortable_array);
+            break;
+        }
+
+        foreach ($sortable_array as $k => $v) {
+            $new_array[$k] = $array[$k];
+        }
+    }
+
+    return $new_array;
+}
+
+
+/******************************/
+function HeaderTextBox($pdf,$txt,$arryCompany){ 
+	global $Config;
+	$all = $pdf->openObject();
+	$pdf->saveState();
+
+	$pdf->setStrokeColor(0,0,0,1);
+	$pdf->setLineStyle(1);
+	$pdf->setColor(0,0,0,1);
+	
+
+	if($arryCompany[0]['Image'] !='' && file_exists($Config['Prefix'].'upload/company/'.$arryCompany[0]['Image']) ){
+		$SiteLogo = $Config['Prefix'].'upload/company/'.$arryCompany[0]['Image'];
+		//echo $SiteLogo;exit;
+		$pdf->addJpegFromFile($SiteLogo,400,$pdf->y-30,'150','');
+	}
+	$Address = str_replace("\n"," ",stripslashes($arryCompany[0]['Address']));
+	$CompanyInfo =  "<b>".stripslashes($arryCompany[0]['CompanyName'])."</b>\n".$Address.",\n".stripslashes($arryCompany[0]['City']).", ".stripslashes($arryCompany[0]['State']).", ".stripslashes($arryCompany[0]['Country'])."-".stripslashes($arryCompany[0]['ZipCode'])."\nMobile : ".stripslashes($arryCompany[0]['Mobile']); 
+	
+	if(!empty($arryCompany[0]['LandlineNumber']))
+		$CompanyInfo .= "\nLandline : ".stripslashes($arryCompany[0]['LandlineNumber']);
+	if(!empty($arryCompany[0]['Fax']))
+		$CompanyInfo .= "\nFax : ".stripslashes($arryCompany[0]['Fax']);
+
+	$CompanyInfo .= "\nEmail : ".stripslashes($arryCompany[0]['Email']);
+	if(!empty($arryCompany[0]['Website']))
+		$CompanyInfo .= "\nWebsite : <c:alink:".$arryCompany[0]['Website'].">".$arryCompany[0]['Website']."</c:alink>";
+
+	$pdf->ezText($CompanyInfo,8,array('justification'=>'left', 'spacing'=>'1.3'));
+
+
+
+	$arTxt = explode("<",$txt);
+	$strlen = strlen($arTxt[0]);
+
+	$pdf->setLineStyle(0.5);
+	$pdf->rectangle(50,$pdf->y-50,500,33);
+
+	$pdf->setLineStyle(1);
+	$pdf->ezSetDy(-22);  
+	$pdf->ezText("<b>".$txt."</b>",14,array('justification'=>'centre')); 
+	$pdf->ezSetDy(-10);
+	
+	$pdf->restoreState();
+	$pdf->closeObject();
+	$pdf->addObject($all,'add');
+}
+
+/******************************/
+function FooterTextBox($pdf){ 
+	global $Config;
+	// put a line top and bottom on all the pages
+
+	$all = $pdf->openObject();
+	$pdf->saveState();
+	$pdf->setLineStyle(0.2);
+	$pdf->setStrokeColor(0,0,0,1);
+	$pdf->line(50,50,550,50);
+	$pdf->setStrokeColor(0,0,0,1);
+	//$pdf->rectangle(50,75,500,33);
+	$pdf->setLineStyle(1);
+	$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+	
+	$Config['Url']	= 'http://54.235.157.220/erp/';
+
+	$pdf->addText(250,35,8,"<c:alink:".$Config['Url'].">".$Config['Url']."</c:alink>");
+	$pdf->restoreState();
+	$pdf->closeObject();
+	//$pdf->addObject($all,'next');
+	$pdf->addObject($all,'all');
+}
+/******************************/
+function TitlePage($arry, $pdf){
+	global $Config;
+	
+	$orderid = $_GET['orderid'];
+	$jobid = $_GET['jobid'];
+	
+	$pdf->setStrokeColor(0,0,0,1);
+	$pdf->setLineStyle(1.7);
+
+	$pdf->addJpegFromFile($Config['MainCodeDir'].'doc/REPORT/Logo and Theme.jpg',154,$pdf->y+95,285,0);
+	$pdf->addLink("http://www.geo-search.com",156,722,435,777);
+
+	/*
+	$pdf->ezText('<c:ilink:label0>Introduction</c:ilink>',16,array('aright'=>$xpos));
+	$pdf->ezText('<c:ilink:label1>Work</c:ilink>',16,array('aright'=>$xpos));
+	*/
+	$RadiusPadd = 13;
+	if($Config['ReportType']=="P"){
+		$pdf->ezSetDy(25);
+		$pdf->ezText("<i><b>Preliminary Report</b></i>",20,array('justification'=>'centre'));
+		$RadiusPadd = -2;
+	}
+	$LineBottomP = 590;
+	if(strlen($arry['PRODNAME'])>50){
+		$LineBottomP = 570;
+	}
+	$pdf->line(43,650,550,650);
+	$pdf->ezSetDy($RadiusPadd);
+	$pdf->ezText("<i><b>".$arry['PRODNAME']."</b></i>",20,array('justification'=>'centre'));
+	$pdf->line(43,$LineBottomP,550,$LineBottomP);
+	$pdf->setLineStyle(1);
+
+	$pdf->ezSetDy(-42);
+
+	$pdf->ezText("<c:alink:".$Config['MapUrl']."><i>Satellite view</i></c:alink>",10,array('justification'=>'centre','spacing'=>'1'));
+
+	if(!empty($arry['PROJECTNO'])){
+		$Project = "\nProject #: ".$arry['PROJECTNO'];
+	}
+	
+	if(!empty($arry['PONUMBER'])){
+		$Ponumber = "\nPO #: ".$arry['PONUMBER'];
+	}
+
+
+	if(!empty($arry['TPADDRESS'])){
+		$TPADDRESS = "\n".$arry['TPADDRESS'];
+	}
+	$CityCntState = "";
+	if(!empty($arry['TPCITY'])){
+		$CityCntState .= $arry['TPCITY'].", ";
+	}
+	if(!empty($arry['TPCOUNTY'])){
+		$CityCntState .= $arry['TPCOUNTY']." County";
+	}
+	if(!empty($arry['TPSTATE'])){
+		$CityCntState .= ", ".$arry['TPSTATE'];
+	}
+	$pdf->ezSetDy(-50);
+
+	$pdf->ezText("<i>Target Property:</i>", 12,array('justification'=>'centre','spacing'=>'1'));
+	$pdf->ezSetDy(-4);
+	$pdf->ezText("<i><b>".$arry['PROPERTYNA']." ".$TPADDRESS."\n".$CityCntState." ".$arry['TPZIP']."</b></i>", 12,array('justification'=>'centre','spacing'=>'1.3'));
+	$pdf->ezSetDy(-90);
+	$pdf->ezText("<i>Prepared For:</i>", 12,array('justification'=>'centre','spacing'=>'1'));
+	$pdf->ezSetDy(-4);
+	$pdf->ezText("<i><b>".$arry['COMPANYNAM']."\n\n\n\n\n\nOrder #: ".$orderid."\nJob #: ".$jobid.$Project.$Ponumber."\nDate: ".date('m/d/Y')."</b></i>", 12,array('justification'=>'centre','spacing'=>'1.3'));
+	
+	// Create White Space to remove paging
+	ClearPaging($pdf);
+
+}
+/******************************/
+function TableOfContent($arry, $MapPdfFiles1, $MapPdfFiles2, $pdf){
+	global $Config;
+
+	$pdf->ezInsertMode(1,1,'after');
+	HeaderTextLine($pdf,'Table of Contents');
+	
+	/*$pdf->ezNewPage();
+	$YCord = $pdf->y-11;
+	$pdf->line(50,$YCord,230,$YCord);
+	$pdf->line(370,$YCord,550,$YCord);
+	$pdf->ezText("<i><b>Table of Contents</b></i>\n",14,array('justification'=>'centre'));
+	*/
+
+	$xpos = 520;
+	$lgap = 40;
+
+	/****************************
+	$Head1 = 'Heading'; $Head2 = 'Page No.'; 
+	$arryDef[0][$Head1] = ' ';
+	$arryDef[0][$Head2] = '  ';
+	$data[] = $arryDef[0];
+
+	$pdf->ezTable($data,'','',array('cols'=>array($Head2=>array('justification'=>'left'),$Head2=>array('justification'=>'right','width'=>80)), 'shaded'=>0, 'showLines'=>0, 'xPos' =>300 ,'width'=>500,'fontSize'=>11,'rowGap'=>0,'showHeadings'=>0,'showLines'=>0) );	
+	$pdf->setStrokeColor(0,0,0,1);*/
+			
+	$Config['PageSummary'] += 2;
+	$Config['PageFinding'] += 1;
+	$Config['PageLoc'] += 1;
+	$Config['PageUnloc'] += 2;
+	$Config['PageReport'] += 2;
+	$Config['PageDef'] += 2;
+	$Config['PageOilGas'] += 2;
+	$Config['PagePipe'] += 2;
+
+	$pdf->setColor(0,0,255,1);
+	$pdf->ezText("<c:ilink:label0><i>Target Property Summary</i></c:ilink><C:dots:1".$Config['PageSummary'].">",10,array("aright"=>$xpos,'left'=> $lgap));
+	if($Config['DatabaseFindingExist']==1){
+		$pdf->setColor(0,0,255,1);
+		$pdf->ezText("\n<c:ilink:label1><i>Database Findings Summary</i></c:ilink><C:dots:1".$Config['PageFinding'].">",10,array("aright"=>$xpos,'left'=> $lgap));
+		$pdf->setColor(0,0,255,1);
+		$pdf->ezText("\n<c:ilink:label2><i>Locatable Database Findings</i></c:ilink><C:dots:1".$Config['PageLoc'].">",10,array("aright"=>$xpos,'left'=> $lgap));
+	}
+
+
+	if(is_array($MapPdfFiles1)){ 
+		$NumMapPdf1 = sizeof($MapPdfFiles1);
+		foreach($MapPdfFiles1 as $MapJpg){
+			if(file_exists($Config['MapJpgPath'].$MapJpg)){
+				$MapName = str_replace(".jpg","",$MapJpg); 
+				$MapPage = $Config['Page'.$MapName]+2;
+				$MapName = str_replace("_".$Config['jobid'],"",$MapName); 
+				$pdf->setColor(0,0,255,1);
+
+				$MapTitle = ucfirst($MapName)." Map";
+				if($MapTitle=="Radius2K Map") $MapTitle="Radius Map 1";
+				if($MapTitle=="Radius1K Map") $MapTitle="Radius Map 2";
+
+				$pdf->ezText("\n<c:ilink:label".$Config['LableMap1']."><i>".$MapTitle."</i></c:ilink><C:dots:1".$MapPage.">",10,array("aright"=>$xpos,'left'=> $lgap));
+				$Config['LableMap1']++;
+			}
+		}
+	}
+
+	$NextID = 3+$NumMapPdf1; 
+
+
+	if($Config['PipeLine']==1){
+		$pdf->setColor(0,0,255,1);
+		$pdf->ezText("\n<c:ilink:label".$Config['ReportLabel']."><i>Oil & Gas Pipeline Report</i></c:ilink><C:dots:1".$Config['PagePipe'].">",10,array("aright"=>$xpos,'left'=> $lgap));
+	}
+
+	if($Config['NumLocatable']>0){
+		$pdf->setColor(0,0,255,1);
+		$pdf->ezText("\n<c:ilink:label".$Config['ReportLabel']."><i>Report Summary of Locatable Sites</i></c:ilink><C:dots:1".$Config['PageReport'].">",10,array("aright"=>$xpos,'left'=> $lgap));
+	}
+
+	if($Config['OilGas']=='OG'){
+		$pdf->setColor(0,0,255,1);
+		$pdf->ezText("\n<c:ilink:label".$Config['OilGasDest']."><i>".$Config['OilTitle']."</i></c:ilink><C:dots:1".$Config['PageOilGas'].">",10,array("aright"=>$xpos,'left'=> $lgap));
+	}
+
+	if($Config['UnlocExist']==1){
+		$pdf->setColor(0,0,255,1);
+		$pdf->ezText("\n<c:ilink:label".$Config['UnlocLabel']."><i>Report Summary of Unlocatable Sites</i></c:ilink><C:dots:1".$Config['PageUnloc'].">",10,array("aright"=>$xpos,'left'=> $lgap));
+	}
+
+	if(is_array($MapPdfFiles2)){ 
+		$NumMapPdf2 = sizeof($MapPdfFiles2);
+		foreach($MapPdfFiles2 as $MapJpg){
+			if(file_exists($Config['MapJpgPath'].$MapJpg)){
+				$MapName = str_replace(".jpg","",$MapJpg); 
+				$MapPage = $Config['Page'.$MapName]+2;
+				$MapName = str_replace("_".$Config['jobid'],"",$MapName); 
+				
+				$pdf->setColor(0,0,255,1);
+				$pdf->ezText("\n<c:ilink:label".$Config['LableMap2']."><i>".strtoupper($MapName)." Map</i></c:ilink><C:dots:1".$MapPage.">",10,array("aright"=>$xpos,'left'=> $lgap));
+				$Config['LableMap2']++;
+				$MapTitlePage = $Config['Paget'.$MapName]+2;
+				if($MapName=='FEMA'){
+					$MapNameTitle = "FEMA Report";
+				}else if($MapName=='NWI'){
+					$MapNameTitle = "NWI Report";
+				}else if($MapName=='Soil'){
+					$MapNameTitle = "SOIL Report";
+				}else{
+					$MapNameTitle = ucfirst($MapName);
+				}
+				$pdf->setColor(0,0,255,1);
+				$pdf->ezText("\n<c:ilink:label".$Config['LableMap2']."><i>".$MapNameTitle."</i></c:ilink><C:dots:1".$MapTitlePage.">",10,array("aright"=>$xpos,'left'=> $lgap));
+				$Config['LableMap2']++;
+				$NextID += 2;
+			}
+		}
+	}
+
+	if($Config['DatabaseFindingExist']==1){
+		$pdf->setColor(0,0,255,1);
+		$pdf->ezText("\n<c:ilink:label".$Config['LabelDefinition']."><i>Environmental Records Definitions</i></c:ilink><C:dots:1".$Config['PageDef'].">",10,array("aright"=>$xpos,'left'=> $lgap));
+	}
+
+
+	//ClearFooter($pdf);
+
+}
+
+function ClearFooter($pdf){
+	$all = $pdf->openObject();
+	$pdf->saveState();
+	$pdf->setColor(255,255,255,1);
+	$pdf->filledRectangle(47,10,520,50);
+	$pdf->restoreState();
+	$pdf->closeObject();
+	$pdf->addObject($all,'add');
+	return true;
+}
+
+function ClearPaging($pdf){
+	$all = $pdf->openObject();
+	$pdf->saveState();
+	$pdf->setColor(255,255,255,1);
+	$pdf->filledRectangle(515,52,40,20);
+	$pdf->restoreState();
+	$pdf->closeObject();
+	$pdf->addObject($all,'add');
+	return true;
+}
+
+/******************************/
+function TargetPropertySummary($arry,$arryLocation,$arryCounty,$GEOMETRY,$ZipCovered,$StateCovered, $pdf){
+	global $Config;
+
+	if(empty($Config['PageSummary'])){
+		$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+		$Config['PageSummary'] = $page;
+	}
+
+	$Config['LableTitleDest']++;
+
+	$Title = 'Target Property Summary';
+	$Title = $Title.'<C:rf:'.$Title.'>';
+	HeaderTextBox($pdf,$Title);
+	$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+
+	/*
+	$pdf->ezText('Introductiongggggggg<C:rf:Introduction>',26,array('justification'=>'centre'));
+	$pdf->addDestination('label1','FitH','');
+	*/
+	if(!empty($arry['TPADDRESS'])) $arry['TPADDRESS'] = stripslashes($arry['TPADDRESS'])."\n";
+	if(!empty($arry['TPCITY'])) $arry['TPCITY'] = stripslashes($arry['TPCITY']).", ";
+
+	$QUADNAME = explode(",",$arryLocation['QUADNAME']);
+
+	$pdf->ezText("<i><b>".stripslashes($arry['PROPERTYNA'])."\n".$arry['TPADDRESS'].$arry['TPCITY'].$arry['TPCOUNTY']." County, ".$arry['TPSTATE']." ".$arry['TPZIP']."</b></i>",10,array('justification'=>'left','spacing'=>'1.2'));
+	$pdf->ezSetDy(-7);
+	$pdf->ezText("<i>USGS Quadrangle: <b>".$QUADNAME[0].", ".$arryCounty['STATE']."</b>\nTarget Property Geometry: <b>".$arry['GEOTYPE']."</b></i>",10,array('justification'=>'left','spacing'=>'1.2'));
+	$pdf->ezSetDy(-7);
+	$pdf->ezText("<i>Target Property Longitude(s)/Latitude(s):\n<b>". $arry["GEOMETRY_MAIN"] ."</b></i>", 10 , array('justification'=>'left','spacing'=>'1.2'));
+	$pdf->ezSetDy(-7);
+	$pdf->ezText("<i>County/Parish Covered:\n<b>".$arryCounty['COUNTY']." (".$arryCounty['STATE'].")</b></i>",10,array('justification'=>'left','spacing'=>'1.2'));
+	$pdf->ezSetDy(-7);
+	$pdf->ezText("<i>Zipcode(s) Covered:<b>".$ZipCovered."</b></i>",10,array('justification'=>'left','spacing'=>'1.2'));
+	$pdf->ezSetDy(-7);
+	$pdf->ezText("<i>State(s) Covered:\n<b>".$StateCovered."</b></i>",10,array('justification'=>'left','spacing'=>'1.2'));
+	$pdf->ezSetDy(-7);
+	$pdf->ezText("*<i><b>Target property is located in Radon Zone ".$arry['ZONE'].".\n".$arry['ZONEDESCRIBE']."</b></i>",10,array('justification'=>'left','spacing'=>'1.2'));
+
+
+	if($arry['TPCOUNTY']=="Bexar" || $arry['TPCOUNTY']=="Travis" || $arry['TPCOUNTY']=="Williamson" || $arry['TPCOUNTY']=="Hays"){
+		$pdf->ezSetDy(-7);
+		$pdf->ezText("<i><b>Your site is located within ".$arry['TPCOUNTY']." County, which is known to contain karst habitat. Please contact Celeste Brancel at celeste.brancel@tpwd.state.tx.us or 512-912-7021 for more information regarding the possibility of additional requirements for your project.</b></i>",10,array('justification'=>'left','spacing'=>'1.2'));
+	}
+
+
+	//$pdf->setLineStyle(1);	$pdf->rectangle(50,55,500,65);
+	
+
+	if($arry['PRODNAME']=="GeoPlus Radius Report" || $arry['PRODNAME']=="Radius Report"){
+		$pdf->addText(55,250,8,"<i>This report was designed by GeoSearch to meet or exceed the records search requirements of the All Appropriate Inquires Rule (40 CFR</i>");
+		$pdf->addText(55,240,8,"<i>§312.26) and the current version of the ASTM International E1527, Standard Practice for Environmental Site Assessments: Phase I</i>");
+		$pdf->addText(55,230,8,"<i>Environmental Site Assessment Process or, if applicable, the custom requirements requested by the entity that ordered this report. The</i>");
+		$pdf->addText(55,220,8,"<i>records and databases of records used to compile this report were collected from various federal,state and local governmental entities. It is</i>");
+		$pdf->addText(55,210,8,"<i>the goal of GeoSearch to meet or exceed the 40 CFR §312.26 and E1527 requirements for updating records by using the best available</i>");
+		$pdf->addText(55,200,8,"<i>technology. GeoSearch contacts the appropriate governmental entities on a recurring basis. Depending on the frequency with which a</i>");
+		$pdf->addText(55,190,8,"<i>record source or database of records is updated by the governmental entity, the data used to prepare this report may be updated monthly,</i>");
+		$pdf->addText(55,180,8,"<i>quarterly, semi-annually, or annually.</i>");
+	}
+
+
+	$pdf->addText(55,165,8,"<i>Disclaimer - The information provided in this report was obtained from a variety of public sources. GeoSearch cannot ensure and makes no</i>");
+	$pdf->addText(55,155,8,"<i>warranty or representation as to the accuracy, reliability, quality, errors occurring from data conversion or the customer's interpretation of</i>");
+	$pdf->addText(55,145,8,"<i>this report. This report was made by GeoSearch for exclusive use by its clients only. Therefore, this report may not contain sufficient</i>");
+	$pdf->addText(55,135,8,"<i>information for other purposes or parties. GeoSearch and its partners, employees, officers And independent contractors cannot be held</i>");
+	$pdf->addText(55,125,8,"<i>liable For actual, incidental, consequential, special or exemplary damages suffered by a customer resulting directly or indirectly from any</i>");
+	$pdf->addText(55,115,8,"<i>information provided by GeoSearch.</i>");
+
+
+}
+/******************************/
+function DatabaseFindingTable($FindingArry,$title,$TotalLoc,$TotalUnloc,$pdf){
+	global $Config;
+	$Head1 = "<b><i>\n\nDatabase</i></b>"; $Head2 = "<b><i>\n\nAcronym</i></b>"; $Head3 = "<b><i>\n\nLocatable</i></b>"; 
+	$Head4 = "<b><i>\n\nUnlocatable</i></b>"; $Head5 = "<b><i>Search Radius (miles)</i></b>";
+
+	if(sizeof($FindingArry)>0){
+		$Config['FindingTitleExist']++;
+		if($Config['FindingTitleExist']>1) HeaderTextBox($pdf,'Database Findings Summary');
+		unset($data);
+		$pdf->setStrokeColor(0,0,0,1);
+		$i=0;
+
+		$pdf->ezText("<u><b><i>".$title." LISTING</i></b></u>\n", 9,array('justification'=>'left'));
+		
+		foreach ($FindingArry as $k => $v) {
+			$Config['Label']++;
+			if($v['JOBRADIUS']<=0.02) $v['JOBRADIUS'] = 'TP';
+			
+			if($Config['UnlocExist']==1 && $v['UNLOCATABLE']>0){
+				$UnlocLabel = $Config['UnlocLabel'];
+				$UNLOCATABLE = '<c:ilink:label'.$UnlocLabel.'><c:alink:1>'.$v['UNLOCATABLE'].'</c:alink></c:ilink>'; 
+			}else{
+				$UNLOCATABLE = $v['UNLOCATABLE'];
+			}
+
+			$arryDef[$i][$Head1] = '<i>'.strtoupper($v['DESCRIPTIO']).'</i>';
+			$arryDef[$i][$Head2] ='<c:ilink:label'.$Config['Label'].'><c:alink:1><i>'.$v['ACRONYMLAB'].'</i></c:alink></c:ilink>';
+			$arryDef[$i][$Head3] = '<i>'.$v['LOCATABLE'].'</i>';
+			$arryDef[$i][$Head4] = '<i>'.$UNLOCATABLE.'</i>';
+			$arryDef[$i][$Head5] = '<i>'.$v['JOBRADIUS'].'</i>'; 
+			$data[] = $arryDef[$i];
+			$i++;
+			
+		}
+		
+
+		$pdf->ezTable($data,'','',array('cols'=>array($Head2=>array('justification'=>'left','textCol'=>array(255,0,0),'width'=>80),$Head3=>array('justification'=>'center','width'=>50),$Head4=>array('justification'=>'center','width'=>60),$Head5=>array('justification'=>'center','width'=>40)), 'shaded'=>0, 'innerLineThickness'=>0, 'showLines'=>1 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>8, 'rowGap'=>3,'textCol'=>array(0,0,0)) );
+
+		
+		/******************************/
+		$Head1 = 'SubTotal'; $Head2 = 'Acronym'; $Head3 = 'TotalLoc'; 
+		$Head4 = 'TotalUnLoc'; $Head5 = 'Miles';
+
+		unset($data);unset($arryDef);
+		$arryDef[0][$Head1] = '<i>SUB-TOTAL</i>';
+		$arryDef[0][$Head2] = '';
+		$arryDef[0][$Head3] = '<i>'.$TotalLoc.'</i>';
+		$arryDef[0][$Head4] = '<i>'.$TotalUnloc.'</i>';
+		$arryDef[0][$Head5] = '';
+
+		$data[] = $arryDef[0];
+		$pdf->ezSetDy(-10);
+		$pdf->ezTable($data,'','',array('cols'=>array($Head2=>array('justification'=>'left','textCol'=>array(255,0,0),'width'=>80),$Head3=>array('justification'=>'center','width'=>50),$Head4=>array('justification'=>'center','width'=>60),$Head5=>array('justification'=>'center','width'=>40)), 'shaded'=>0, 'showLines'=>1, 'xPos' =>305 ,'width'=>500,'fontSize'=>8, 'rowGap'=>2,'showHeadings'=>0,'showLines'=>1) );
+
+		/******************************/
+
+	}
+}
+/******************************/
+function TotalFindingTable($TotalLoc,$TotalUnloc,$pdf){
+		$pdf->ezSetDy(-20);
+
+		$Head1 = 'Total'; $Head2 = 'Acronym'; $Head3 = 'TotalLoc'; 
+		$Head4 = 'TotalUnLoc'; $Head5 = 'Miles';
+
+		unset($data);unset($arryDef);
+		$arryDef[0][$Head1] = '<i>TOTAL</i>';
+		$arryDef[0][$Head2] = '';
+		$arryDef[0][$Head3] = '<i>'.$TotalLoc.'</i>';
+		$arryDef[0][$Head4] = '<i>'.$TotalUnloc.'</i>';
+		$arryDef[0][$Head5] = '';
+
+		$data[] = $arryDef[0];
+
+		$pdf->ezTable($data,'','',array('cols'=>array($Head2=>array('justification'=>'left','textCol'=>array(255,0,0),'width'=>80),$Head3=>array('justification'=>'center','width'=>50),$Head4=>array('justification'=>'center','width'=>60),$Head5=>array('justification'=>'center','width'=>40)), 'shaded'=>0, 'showLines'=>1, 'xPos' =>305 ,'width'=>500,'fontSize'=>8,'rowGap'=>2,'showHeadings'=>0,'showLines'=>1) );
+
+}
+
+/******************************/
+function DatabaseLocatable($FindingArry,$title,$pdf){
+	global $Config;
+
+	$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+    $Config['PageLocatable'] = $page;
+
+
+	$Head1 = "<b><i>Acronym</i></b>"; $Head2 = "<b><i>Target Property</i></b>"; $Head3 = "<b><i>Search Radius (miles)</i></b>"; 
+	$Head4 = "<b><i>1/8 Mile (> TP)</i></b>"; $Head5 = "<b><i>1/4 Mile (> 1/8)</i></b>"; $Head6 = "<b><i>1/2 Mile (> 1/4)</i></b>";
+	$Head7 = "<b><i>1 Mile (> 1/2)</i></b>"; $Head8 = "<b><i>\n> 1 Mile</i></b>"; $Head9 = "<b><i>Total</i></b>";
+
+	$TargetProperty=0; $Mile8=0; $Mile4=0; $Mile2=0; $Mile1=0; $Mile11=0; $ToalLocatable = 0;
+	if(sizeof($FindingArry)>0){
+		$Config['LocatableTitleExist']++;
+		if($Config['LocatableTitleExist']>1) HeaderTextBox($pdf,'Locatable Database Findings');
+		unset($data); 
+		$pdf->ezText("<u><b><i>".$title." LISTING</i></b></u>\n", 9,array('justification'=>'left'));
+		$i=0;
+				
+		foreach ($FindingArry as $k => $v) {
+			$arryDef[$i][$Head1] = '<i>'.$v['ACRONYMLAB'].'</i>';
+			$arryDef[$i][$Head2] = '<i>'.$v['TargetProperty'].'</i>';
+			$arryDef[$i][$Head3] = '<i>'.$v['JOBRADIUS'].'</i>';
+			$arryDef[$i][$Head4] = '<i>'.$v['Mile8'].'</i>';
+			$arryDef[$i][$Head5] = '<i>'.$v['Mile4'].'</i>';
+			$arryDef[$i][$Head6] = '<i>'.$v['Mile2'].'</i>';
+			$arryDef[$i][$Head7] = '<i>'.$v['Mile1'].'</i>';
+			$arryDef[$i][$Head8] = '<i>'.$v['Mile11'].'</i>';
+			$arryDef[$i][$Head9] = '<i>'.$v['LOCATABLE'].'</i>';
+			$data[] = $arryDef[$i];
+
+			$TargetProperty += $v['TargetProperty']; 
+			$Mile8 += $v['Mile8']; $Mile4 += $v['Mile4']; 
+			$Mile2 += $v['Mile2']; $Mile1 += $v['Mile1']; 
+			$Mile11 += $v['Mile11'];  $ToalLocatable +=  $v['LOCATABLE'];
+			$i++;
+		}
+		$pdf->ezTable($data,'','',array('cols'=>array($Head2=>array('justification'=>'left','width'=>45),$Head3=>array('justification'=>'left','width'=>40),$Head4=>array('justification'=>'center','width'=>45),$Head5=>array('justification'=>'center','width'=>45),$Head6=>array('justification'=>'center','width'=>45),$Head7=>array('justification'=>'center','width'=>35),$Head8=>array('justification'=>'center','width'=>40),$Head9=>array('justification'=>'center','width'=>70)), 'shaded'=>0, 'showLines'=>1 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>8, 'rowGap'=>3) );
+
+		
+		/******************************/
+		unset($data);unset($arryDef);
+		if($TargetProperty==0) $TargetProperty='';
+		$arryDef[0][$Head1] = '<i>SUB-TOTAL</i>';
+		$arryDef[0][$Head2] = '<i>'.$TargetProperty.'</i>';
+		$arryDef[0][$Head3] = '';
+		$arryDef[0][$Head4] = '<i>'.$Mile8.'</i>';
+		$arryDef[0][$Head5] = '<i>'.$Mile4.'</i>';
+		$arryDef[0][$Head6] = '<i>'.$Mile2.'</i>';
+		$arryDef[0][$Head7] = '<i>'.$Mile1.'</i>';
+		$arryDef[0][$Head8] = '<i>'.$Mile11.'</i>';
+		$arryDef[0][$Head9] = '<i>'.$ToalLocatable.'</i>';
+		$data[] = $arryDef[0];
+		
+		$pdf->ezSetDy(-10);
+		$pdf->ezTable($data,'','',array('cols'=>array($Head2=>array('justification'=>'left','width'=>45),$Head3=>array('justification'=>'left','width'=>40),$Head4=>array('justification'=>'center','width'=>45),$Head5=>array('justification'=>'center','width'=>45),$Head6=>array('justification'=>'center','width'=>45),$Head7=>array('justification'=>'center','width'=>35),$Head8=>array('justification'=>'center','width'=>40),$Head9=>array('justification'=>'center','width'=>70)), 'shaded'=>0, 'xPos' =>305 ,'width'=>500, 'fontSize'=>9, 'rowGap'=>2,'showHeadings'=>0,'showLines'=>1) );
+
+		
+	}
+	$Config['TotalTargetProperty'] += $TargetProperty;
+	$Config['TotalMile8'] += $Mile8; $Config['TotalMile4'] += $Mile4; $Config['TotalMile2'] += $Mile2;
+	$Config['TotalMile1'] += $Mile1; $Config['TotalMile11'] += $Mile11; $Config['TotalMile'] += $ToalLocatable;
+	/******** TAOTAL *********/
+	if($title=='TRIBAL'){
+		$pdf->ezSetDy(-50);
+		unset($data);unset($arryDef);
+		if($Config['TotalTargetProperty']==0) $Config['TotalTargetProperty']='';
+		$arryDef[0][$Head1] = '<i>TOTAL</i>';
+		$arryDef[0][$Head2] = '<i>'.$Config['TotalTargetProperty'].'</i>';
+		$arryDef[0][$Head3] = '';
+		$arryDef[0][$Head4] = '<i>'.$Config['TotalMile8'].'</i>';
+		$arryDef[0][$Head5] = '<i>'.$Config['TotalMile4'].'</i>';
+		$arryDef[0][$Head6] = '<i>'.$Config['TotalMile2'].'</i>';
+		$arryDef[0][$Head7] = '<i>'.$Config['TotalMile1'].'</i>';
+		$arryDef[0][$Head8] = '<i>'.$Config['TotalMile11'].'</i>';
+		$arryDef[0][$Head9] = '<i>'.$Config['TotalMile'].'</i>';
+		$data[] = $arryDef[0];
+
+		$pdf->ezTable($data,'','',array('cols'=>array($Head2=>array('justification'=>'left','width'=>45),$Head3=>array('justification'=>'left','width'=>40),$Head4=>array('justification'=>'center','width'=>45),$Head5=>array('justification'=>'center','width'=>45),$Head6=>array('justification'=>'center','width'=>45),$Head7=>array('justification'=>'center','width'=>35),$Head8=>array('justification'=>'center','width'=>40),$Head9=>array('justification'=>'center','width'=>70)), 'shaded'=>0, 'showLines'=>1 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9, 'rowGap'=>2,'showHeadings'=>0) );
+
+		$pdf->ezSetDy(-20);
+		$pdf->ezText("<b><i>NOTES:\nNS = NO SEARCH REQUESTED BY CUSTOMER</i></b>",8,array('justification'=>'left'));
+		
+
+	}
+
+}
+/******************************/
+/******************************/
+function ReportSummaryTable($LocatableSummary,$pdf){
+	global $Config;
+	if(empty($Config['PageReport'])){
+		$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+		$Config['PageReport'] = $page;
+	}
+
+	$Head1 = '<b>Map ID#</b>'; $Head2 = '<b>Database Name</b>'; $Head3 = '<b>Site ID#</b>'; 
+	$Head4 = '<b>Distance From Site</b>'; $Head5 = '<b>Site Name</b>'; $Head6 = '<b>Address</b>';
+	$Head7 = '<b>City, Zip Code</b>'; 
+
+	if(sizeof($LocatableSummary)>0){
+			
+
+		$Config['LableTitleDest']++;
+		$Title = 'Report Summary of Locatable Sites';
+		$Title = $Title.'<C:rf:'.$Title.'>';
+		HeaderTextBox($pdf,$Title);
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+
+		unset($arryDef);
+		$arryDef[0][$Head1] = $Head1;
+		$arryDef[0][$Head2] = $Head2;
+		$arryDef[0][$Head3] = $Head3;
+		$arryDef[0][$Head4] = $Head4;
+		$arryDef[0][$Head5] = $Head5;
+		$arryDef[0][$Head6] = $Head6;
+		$arryDef[0][$Head7] = $Head7;
+		$data[] = $arryDef[0]; $pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('width'=>25),$Head2=>array('justification'=>'left','width'=>75),$Head3=>array('width'=>75),$Head4=>array('width'=>45),$Head5=>array('width'=>100),$Head7=>array('width'=>70),$Head8=>array('width'=>30)), 'shaded'=>0, 'showLines'=>0 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>7, 'rowGap'=>2,'showHeadings'=>0) );
+
+		$pdf->setStrokeColor(0,0,0,1);
+		$YCord = $pdf->y-1;
+		$pdf->line(50,$YCord,550,$YCord);
+
+		$Config['LableTitle'] = $Config['LableTitleDest'];
+		foreach ($LocatableSummary as $k => $v) {
+
+			$NumMap = sizeof($v['MAPID']);
+			unset($arryDef);unset($data);
+			for($i=0;$i<$NumMap;$i++){
+				if($Config['ReportType']=='F' && $Config['OilGas']!='OG'){
+				$arryDef[$i][$Head1] = '<c:ilink:label'.$Config['LableTitle'].'><c:alink:1>'.$v['MAPID'][$i].'</c:alink></c:ilink>'; 
+				}else{
+					$arryDef[$i][$Head1] = $v['MAPID'][$i];
+				}
+
+				$CityZip = strtoupper($v['CITY'][$i]);
+				if(!empty($v['ZIP'][$i])) $CityZip .= ',  '.substr($v['ZIP'][$i],0,5);
+
+				if($v['TOSITE'][$i]>0) $DistanceSite = $v['TOSITE'][$i].' '.$v['DIRSITE'][$i];
+				else $DistanceSite = "TP";
+
+				$arryDef[$i][$Head2] = $v['RECLABEL'][$i];
+				$arryDef[$i][$Head3] = $v['SITEID'][$i];
+				$arryDef[$i][$Head4] = $DistanceSite; 
+				$arryDef[$i][$Head5] = strtoupper($v['SITENAME'][$i]); 
+				$arryDef[$i][$Head6] = strtoupper($v['ADDRESS'][$i]); 
+				$arryDef[$i][$Head7] = $CityZip;
+				//$arryDef[$i][$Head8] = '<c:ilink:label'.$Config['LabelMap'].'><c:alink:1>'.$v['PAGE'][$i].'</c:alink></c:ilink>';
+
+				$data[] = $arryDef[$i];
+				if($Config['ReportType']=='F' && $Config['OilGas']!='OG'){ $Config['LableTitle']++; } 
+			}	
+
+			$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('width'=>25),$Head2=>array('justification'=>'left','width'=>75),$Head3=>array('width'=>75),$Head4=>array('width'=>45),$Head5=>array('width'=>100),$Head7=>array('width'=>70)), 'shaded'=>0, 'showLines'=>0 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>7, 'rowGap'=>3,'showHeadings'=>0) );
+
+			$pdf->setStrokeColor(0,0,0,1);
+			$YCord = $pdf->y-1;
+			$pdf->line(50,$YCord,550,$YCord);
+
+
+		}
+		
+	}
+
+}
+
+
+/******************************/
+function ReportSummaryUnlocatable($FindingArry,$pdf){
+	$Head1 = '<b>Database Type</b>'; $Head2 = "<b>Site ID#</b>"; $Head3 = "<b>Site Name</b>"; 
+	$Head4 = '<b>Address</b>';	$Head5 = '<b>City</b>'; $Head6 = '<b>Zip Code</b>'; 
+	global $Config;
+
+
+	if(empty($Config['PageUnloc'])){
+		$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+		$Config['PageUnloc'] = $page;
+	}
+
+	if(sizeof($FindingArry)>0){
+		$Config['LableTitleDest']++;
+		$Title = 'Report Summary of Unlocatable Sites';
+		$Title = $Title.'<C:rf:'.$Title.'>';
+		HeaderTextBox($pdf,$Title);
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+
+		unset($arryDef); $UnlocLabel = $Config['UnlocLabel']+1;
+		for($i=0;$i<sizeof($FindingArry);$i++){
+			if($Config['ReportType']=='F'){
+				$DatabaseType = '<c:ilink:label'.$UnlocLabel.'><c:alink:1>'.$FindingArry[$i]['DatabaseType'].'</c:alink></c:ilink>'; 
+			}else{
+				$DatabaseType = $FindingArry[$i]['DatabaseType']; 
+			}
+
+			$arryDef[$i][$Head1] = $DatabaseType;
+			$arryDef[$i][$Head2] = $FindingArry[$i]['SiteId'];
+			$arryDef[$i][$Head3] = strtoupper($FindingArry[$i]['Sitename']);
+			$arryDef[$i][$Head4] = strtoupper($FindingArry[$i]['Address']);
+			$arryDef[$i][$Head5] = strtoupper($FindingArry[$i]['City']);
+			$arryDef[$i][$Head6] = $FindingArry[$i]['Zip'];
+			$data[] = $arryDef[$i];
+			$UnlocLabel++;
+		}
+		$pdf->ezSetDy(-4); 
+		$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('width'=>60),$Head2=>array('justification'=>'left','width'=>80),$Head4=>array('width'=>100),$Head5=>array('width'=>70),$Head6=>array('width'=>50)), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>8, 'rowGap'=>3) );
+	}
+}
+
+/******************************/
+function DetailsReport($ReportLocArry,$ArryAcronymTitle, $pdf){
+	global $Config;
+
+		$Head1 = '<b>SITE INFORMATION</b>'; $Head2 = '<b>CONTACT INFORMATION</b>'; 
+		for($i=0;$i<sizeof($ReportLocArry);$i++){
+			$Config['LableTitleDest']++;
+			$Acronym = $ReportLocArry[$i]['RECLABEL'];
+			$AcronymTitle = $ArryAcronymTitle[$Acronym]. ' ('.$Acronym.')';
+
+			$ReportLocArry[$i]['AcronymTitle'] = ucfirst($ArryAcronymTitle[$Acronym]);
+
+			$AcronymTitle = $AcronymTitle.'<C:rf:'.$AcronymTitle.'>';
+			HeaderTextBox($pdf,ucfirst($AcronymTitle));
+			$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+			
+			$HeightPlus=0; $HeightPlusTxt = -7;
+			if($Config['TwoLineHeader']==1) { 
+				//$HeightPlus = -9; 
+				$HeightPlusTxt=1;
+			}
+
+			$MapRecWidth = 60;
+			if($ReportLocArry[$i]['MAPID']>99) $MapRecWidth = 65;
+
+
+			$SiteID = $ReportLocArry[$i]['SITEID'];
+			$RecType = $ReportLocArry[$i]['RECTYPE'];
+			
+			$pdf->rectangle(50,705+$HeightPlus,$MapRecWidth,20);
+			$pdf->ezSetDy($HeightPlusTxt); 
+			$pdf->ezText("   <c:alink:".$Config['MapUrl']."><b>MAP ID# ".$ReportLocArry[$i]['MAPID']."</c:alink></b>",9,array('justification'=>'left'));
+			$Distance = round($ReportLocArry[$i]['TOSITE'],2);
+			$Distance = number_format($Distance,2,'.','');
+			$pdf->addText(120,712+$HeightPlus,9,"<b>Distance from Property: ".$Distance." mi. ".$ReportLocArry[$i]['DIRSITE']."</b>");
+
+
+			/*****************************/
+			DetailsSwitch($RecType,$ReportLocArry[$i], $pdf);
+			/*****************************/
+			$pdf->ezText("\n<c:ilink:label".$Config['ReportLabel']."><c:alink:1>Back to Report Summary</c:alink></c:ilink> ",9,array('justification'=>'center', 'spacing'=>'1'));
+		
+		}
+
+		//AddAcronym($ReportLocArry); //Open the comment for above DetailsSwitch
+
+}
+
+function AddAcronym($ReportLocArry){
+	for($i=0;$i<sizeof($ReportLocArry);$i++){
+		extract($ReportLocArry[$i]);
+		$sql = "insert ignore into  a_acronym (RECTYPE, RECLABEL, ADDRESS, CITY, STATE, ZIP, COUNTY, ACRONYM_TITLE) values('".addslashes($RECTYPE)."', '".addslashes($RECLABEL)."', '".addslashes($ADDRESS)."', '".addslashes($CITY)."', '".addslashes($STATE)."', '".addslashes($ZIP)."', '".addslashes($COUNTY)."', '".addslashes($AcronymTitle)."')"; 
+		mysql_query($sql) or die("Error: ".mysql_error()." in the table 'a_acronym'");
+	}
+	exit;
+}
+/******************************/
+function DetailsUnlocatable($UnlocArry,$ArryAcronymTitle, $pdf){
+	global $Config;
+
+	for($i=0;$i<sizeof($UnlocArry);$i++){
+		$Config['LableTitleDest']++;
+		$Acronym = $UnlocArry[$i]['DatabaseType'];
+		$AcronymTitle = $ArryAcronymTitle[$Acronym]. ' ('.$Acronym.')';
+
+		$AcronymTitle = $AcronymTitle.'<C:rf:'.$AcronymTitle.'>';
+		HeaderTextBox($pdf,ucfirst($AcronymTitle));
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+		
+		unset($ReportArry);
+		$ReportArry = $UnlocArry[$i];
+		$ReportArry['SITEID'] = $UnlocArry[$i]['SiteId'];
+		$ReportArry['RECTYPE'] = $UnlocArry[$i]['Rectype'];
+		$RecType = $ReportArry['RECTYPE'];
+
+		$pdf->ezSetDy(-7); 
+		$pdf->ezText("   <b> </b>",9,array('justification'=>'left'));
+
+		/*****************************/
+		DetailsSwitch($RecType, $ReportArry, $pdf);
+		/*****************************/
+		
+		$pdf->ezText("\n\n<c:ilink:label".$Config['UnlocLabel']."><c:alink:1>Back to Report Summary of Unlocatable Sites</c:alink></c:ilink> ",9,array('justification'=>'center', 'spacing'=>'1'));
+
+	}
+}
+
+
+/******************************/
+function DetailsErsReport($ReportLocArry, $pdf){
+	global $Config;
+		$Head1 = '<b>SITE INFORMATION</b>'; $Head2 = '<b>CONTACT INFORMATION</b>'; 
+		for($i=0;$i<sizeof($ReportLocArry);$i++){
+			$Config['LableTitleDest']++;
+			$Acronym = $ReportLocArry[$i]['RECLABEL'];
+			$AcronymTitle = $ReportLocArry[$i]['AcronymTitle']. ' ('.$Acronym.')';
+
+			$AcronymTitle = $AcronymTitle.'<C:rf:'.$AcronymTitle.'>';
+			HeaderTextBox($pdf,ucfirst($AcronymTitle));
+			$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+			
+			$HeightPlus=0; $HeightPlusTxt = -7;
+			if($Config['TwoLineHeader']==1) { 
+				$HeightPlusTxt=1;
+			}
+
+			$MapRecWidth = 60;
+			if($ReportLocArry[$i]['MAPID']>99) $MapRecWidth = 65;
+
+
+			$SiteID = $ReportLocArry[$i]['SITEID'];
+			$RecType = $ReportLocArry[$i]['RECTYPE'];
+			
+			$pdf->ezSetDy($HeightPlusTxt); 
+			
+			/*****************************/
+			DetailsSwitch($RecType,$ReportLocArry[$i], $pdf);
+			/*****************************/
+			$pdf->ezText("\n<c:ilink:label".$Config['ReportLabel']."><c:alink:1>Back to Report Summary</c:alink></c:ilink> ",9,array('justification'=>'center', 'spacing'=>'1'));
+		
+		}
+
+
+}
+/******************************/
+function DetailsSwitch($RecType,$ReportLocArry, $pdf){
+	global $Config; 
+
+	switch(strtoupper($RecType)){
+		case 'ASR':ASR_DET($ReportLocArry,$pdf);break;
+
+		case 'ARRATFA':ARRATFA_DET($ReportLocArry,$pdf);break;
+		case 'ARCAFOP':ARCAFOP_DET($ReportLocArry,$pdf);break;
+		case 'ARWW':ARWW_DET($ReportLocArry,$pdf);break;
+		case 'ARSC':ARSC_DET($ReportLocArry,$pdf);break;
+		case 'ARRBFVCP':ARRBFVCP_DET($ReportLocArry,$pdf);break;
+		case 'ARCDL':ARCDL_DET($ReportLocArry,$pdf);break;
+		case 'ARRST':ARRST_DET($ReportLocArry,$pdf);break;
+		case 'ARPDS':ARPDS_DET($ReportLocArry,$pdf);break;
+		case 'ARERI':ARERI_DET($ReportLocArry,$pdf);break;
+		case 'ARASBESTOS':ARASBESTOS_DET($ReportLocArry,$pdf);break;
+		case 'ARLRST':ARLRST_DET($ReportLocArry,$pdf);break;
+		case 'ARSWF':ARSWF_DET($ReportLocArry,$pdf);break;
+		case 'ARSWIDD':ARSWIDD_DET($ReportLocArry,$pdf);break;
+		case 'ARNOV':ARNOV_DET($ReportLocArry,$pdf);break;
+		case 'ARRMD':ARRMD_DET($ReportLocArry,$pdf);break;
+		case 'ARAIRS':ARAIRS_DET($ReportLocArry,$pdf);break;
+
+		case 'AZCLEANERS':AZCLEANERS_DET($ReportLocArry,$pdf);break;
+		case 'AZUST':AZUST_DET($ReportLocArry,$pdf);break;
+		case 'AZLUST':AZLUST_DET($ReportLocArry,$pdf);break;
+		case 'AZASPL':AZASPL_DET($ReportLocArry,$pdf);break;
+		case 'AZVRPBF':AZVRPBF_DET($ReportLocArry,$pdf);break;
+		case 'AZDRYWELLS':AZDRYWELLS_DET($ReportLocArry,$pdf);break;
+		case 'AZSPILLS':AZSPILLS_DET($ReportLocArry,$pdf);break;
+		case 'AZWWFAC':AZWWFAC_DET($ReportLocArry,$pdf);break;
+		case 'AZAIRS':AZAIRS_DET($ReportLocArry,$pdf);break;
+		case 'AZEUR':AZEUR_DET($ReportLocArry,$pdf);break;
+		case 'AZBIOMW':AZBIOMW_DET($ReportLocArry,$pdf);break;
+		case 'AZCDL':AZCDL_DET($ReportLocArry,$pdf);break;
+		case 'AZCLOSEDSWF':AZCLOSEDSWF_DET($ReportLocArry,$pdf);break;
+		case 'AZOPENLF':AZOPENLF_DET($ReportLocArry,$pdf);break;
+
+		case 'CAHWTS':CAHWTS_DET($ReportLocArry, $pdf);break;
+		case 'CALUST':CALUST_DET($ReportLocArry, $pdf);break;
+		case 'CASWEEPS':CASWEEPS_DET($ReportLocArry, $pdf);break;
+		case 'CAUSTCUPA':CAUSTCUPA_DET($ReportLocArry, $pdf);break;
+		case 'CACLEANUPSITES':CACLEANUPSITES_DET($ReportLocArry, $pdf);break;
+		case 'CACORTESE':CACORTESE_DET($ReportLocArry, $pdf);break;
+		case 'CALSITES':CALSITES_DET($ReportLocArry, $pdf);break;
+		case 'CAENVIROSTOR':CAENVIROSTOR_DET($ReportLocArry, $pdf);break;
+		case 'CAHISTUST':CAHISTUST_DET($ReportLocArry, $pdf);break;
+		case 'CACLEANER':CACLEANER_DET($ReportLocArry, $pdf);break;
+		case 'CASWRCY':CASWRCY_DET($ReportLocArry, $pdf);break;
+		case 'CAENVIROSTORPCA':CAENVIROSTORPCA_DET($ReportLocArry, $pdf);break;
+		case 'CACHMIRS':CACHMIRS_DET($ReportLocArry, $pdf);break;
+		case 'CAEMI':CAEMI_DET($ReportLocArry, $pdf);break;
+		case 'CAABST':CAABST_DET($ReportLocArry, $pdf);break;
+		case 'CACDL':CACDL_DET($ReportLocArry, $pdf);break;
+		case 'CASLIC':CASLIC_DET($ReportLocArry, $pdf);break;
+		case 'CANPDES':CANPDES_DET($ReportLocArry, $pdf);break;
+		case 'CAOCHWFAC':CAOCHWFAC_DET($ReportLocArry,$pdf);break;
+		case 'CAOCISC':CAOCISC_DET($ReportLocArry,$pdf);break;
+ 		case 'CAOCLUST':CAOCLUST_DET($ReportLocArry,$pdf);break;
+		case 'CAOCUST':CAOCUST_DET($ReportLocArry,$pdf);break;
+		case 'CAOCAPST':CAOCAPST_DET($ReportLocArry,$pdf);break;
+		case 'CAOCNPUST':CAOCNPUST_DET($ReportLocArry,$pdf);break;
+		case 'CAACAST':CAACAST_DET($ReportLocArry,$pdf);break;
+		case 'CANFE':CANFE_DET($ReportLocArry,$pdf);break;
+		case 'CANFA':CANFA_DET($ReportLocArry,$pdf);break;
+		case 'CAWTHAULERS':CAWTHAULERS_DET($ReportLocArry,$pdf);break;
+		case 'CAWMUDS':CAWMUDS_DET($ReportLocArry,$pdf);break;
+		case 'CAVCP':CAVCP_DET($ReportLocArry,$pdf);break;
+		case 'CAVCBWT':CAVCBWT_DET($ReportLocArry,$pdf);break;
+		case 'CAVCIHM':CAVCIHM_DET($ReportLocArry,$pdf);break;
+		case 'CAVCIUST':CAVCIUST_DET($ReportLocArry,$pdf);break;
+		case 'CAVCLUFT':CAVCLUFT_DET($ReportLocArry,$pdf);break;
+		case 'CAVCMW':CAVCMW_DET($ReportLocArry,$pdf);break;
+		case 'CAPCUST':CAPCUST_DET($ReportLocArry,$pdf);break;
+		case 'CAREF':CAREF_DET($ReportLocArry,$pdf);break;
+		case 'CADTSCHWT':CADTSCHWT_DET($ReportLocArry,$pdf);break;
+		case 'CARCDL':CARCDL_DET($ReportLocArry,$pdf);break;
+		case 'CARCGL':CARCGL_DET($ReportLocArry,$pdf);break;
+		case 'CARCUST':CARCUST_DET($ReportLocArry,$pdf);break;
+		case 'CARCLUST':CARCLUST_DET($ReportLocArry,$pdf);break;
+		case 'CARCMW':CARCMW_DET($ReportLocArry,$pdf);break;
+		case 'CASWIS':CASWIS_DET($ReportLocArry,$pdf);break;
+		case 'CAPROC':CAPROC_DET($ReportLocArry,$pdf);break;
+		case 'CADROP':CADROP_DET($ReportLocArry,$pdf);break;
+		case 'CASBFD':CASBFD_DET($ReportLocArry,$pdf);break;
+		case 'CASCTL':CASCTL_DET($ReportLocArry,$pdf);break;
+		case 'CASCHMS':CASCHMS_DET($ReportLocArry,$pdf);break;
+		case 'CASDHMMDD':CASDHMMDD_DET($ReportLocArry,$pdf);break;  
+		case 'CASMMW':CASMMW_DET($ReportLocArry,$pdf);break;
+		case 'CAACCS':CAACCS_DET($ReportLocArry,$pdf);break;
+		case 'CASBFDLUFT':CASBFDLUFT_DET($ReportLocArry,$pdf);break;
+		case 'CASCH':CASCH_DET($ReportLocArry,$pdf);break;
+		case 'CASBHWF':CASBHWF_DET($ReportLocArry,$pdf);break;
+		case 'CATOXPITS':CATOXPITS_DET($ReportLocArry,$pdf);break;
+		case 'CAWIP':CAWIP_DET($ReportLocArry,$pdf);break;
+		case 'CASBMW':CASBMW_DET($ReportLocArry,$pdf);break;
+		case 'CAACUST':CAACUST_DET($ReportLocArry,$pdf);break;
+		case 'CAMWMP':CAMWMP_DET($ReportLocArry,$pdf);break;
+		case 'CAMCUST':CAMCUST_DET($ReportLocArry,$pdf);break;
+		case 'CAFSW':CAFSW_DET($ReportLocArry,$pdf);break;
+		case 'CALIENS':CALIENS_DET($ReportLocArry,$pdf);break;
+		case 'CAERAP':CAERAP_DET($ReportLocArry,$pdf);break;
+		case 'CACCUST':CACCUST_DET($ReportLocArry,$pdf);break;
+		case 'CACCHMS':CACCHMS_DET($ReportLocArry,$pdf);break;
+		case 'CACCIHMS':CACCIHMS_DET($ReportLocArry,$pdf);break;
+		case 'CAAOC':CAAOC_DET($ReportLocArry,$pdf);break;
+		case 'CALAHMS':CALAHMS_DET($ReportLocArry,$pdf);break;
+		case 'CALASM':CALASM_DET($ReportLocArry,$pdf);break;
+		case 'CADTSCDR':CADTSCDR_DET($ReportLocArry,$pdf);break;
+		case 'CANCCS':CANCCS_DET($ReportLocArry,$pdf);break;
+		case 'CASDEACL':CASDEACL_DET($ReportLocArry,$pdf);break;
+
+		case 'COCDPS':COCDPS_DET($ReportLocArry, $pdf);break;
+		case 'COLST':COLST_DET($ReportLocArry, $pdf);break;
+		case 'COAST':COAST_DET($ReportLocArry, $pdf);break;
+		case 'COCOVENANTS':COCOVENANTS_DET($ReportLocArry, $pdf);break;
+		case 'COHWSCA':COHWS_DET($ReportLocArry, $pdf);break;
+		case 'COHWSG':COHWS_DET($ReportLocArry, $pdf);break;
+		case 'COHWSTSD':COHWS_DET($ReportLocArry, $pdf);break;
+		case 'COUST':COUST_DET($ReportLocArry, $pdf);break;
+		case 'COHISTSWLF':COHISTSWLF_DET($ReportLocArry, $pdf);break;
+		case 'COANA':COANA_DET($ReportLocArry, $pdf);break;
+		case 'COASCHOOLS':COASCHOOLS_DET($ReportLocArry, $pdf);break;
+		case 'COAPCDP':COAPCDP_DET($ReportLocArry,$pdf);break;
+		case 'COVCRA':COVCRA_DET($ReportLocArry,$pdf);break;
+		case 'COASBESTOS':COASBESTOS_DET($ReportLocArry,$pdf);break;
+		case 'COCDL':COCDL_DET($ReportLocArry,$pdf);break;
+		case 'COSPILLS':COSPILLS_DET($ReportLocArry,$pdf);break;
+		case 'COCLEANERS':COCLEANERS_DET($ReportLocArry,$pdf);break;
+		case 'COSWF':COSWF_DET($ReportLocArry,$pdf);break;
+		case 'CODCHISTLF':CODCHISTLF_DET($ReportLocArry,$pdf);break;
+		case 'COJCMETHANE':COJCMETHANE_DET($ReportLocArry,$pdf);break;
+		case 'COUMTS':COUMTS_DET($ReportLocArry,$pdf);break;
+		case 'COSF':COSF_DET($ReportLocArry,$pdf);break;
+		case 'COWCSWF':COWCSWF_DET($ReportLocArry,$pdf);break;
+		case 'COACFGO':COACFGO_DET($ReportLocArry,$pdf);break;
+		case 'CODCTTLF':CODCTTLF_DET($ReportLocArry,$pdf);break;
+		case 'COMETHANESITES':COMETHANESITES_DET($ReportLocArry,$pdf);break;
+
+		case 'DOF':DOF_DET($ReportLocArry,$pdf);break;
+		case 'DAYCARES':DAYCARES_DET($ReportLocArry,$pdf);break;
+
+		case 'FLLUAST':FLLUAST_DET($ReportLocArry,$pdf);break;
+		case 'FLUAST':FLUAST_DET($ReportLocArry,$pdf);break;
+		case 'FLACLPST':FLACLPST_DET($ReportLocArry,$pdf);break;
+		case 'FLBSRA':FLBSRA_DET($ReportLocArry,$pdf);break;
+		case 'FLNPDES':FLNPDES_DET($ReportLocArry,$pdf);break;
+		case 'FLVCS':FLVCS_DET($ReportLocArry,$pdf);break;
+		case 'FLBF':FLBF_DET($ReportLocArry,$pdf);break;
+		case 'FLCLEANUPS':FLCLEANUPS_DET($ReportLocArry,$pdf);break;
+		case 'FLCLEANERS':FLCLEANERS_DET($ReportLocArry,$pdf);break;
+		case 'FLSPILLS':FLSPILLS_DET($ReportLocArry,$pdf);break;
+		case 'FLSWF':FLSWF_DET($ReportLocArry,$pdf);break;
+		case 'FLECIC':FLECIC_DET($ReportLocArry,$pdf);break;
+		case 'FLBCSWF':FLBCSWF_DET($ReportLocArry,$pdf);break;
+		case 'FLBCBF':FLBCBF_DET($ReportLocArry,$pdf);break;
+		case 'FLGWCA':FLGWCA_DET($ReportLocArry,$pdf);break;
+		case 'FLIC':FLIC_DET($ReportLocArry,$pdf);break;
+		case 'FLNPL':FLNPL_DET($ReportLocArry,$pdf);break;
+		case 'FLUIC':FLUIC_DET($ReportLocArry,$pdf);break;
+		case 'FLCDV':FLCDV_DET($ReportLocArry,$pdf);break;
+		case 'FLWW':FLWW_DET($ReportLocArry,$pdf);break;
+
+		case 'GANONHSI':GANONHSI_DET($ReportLocArry,$pdf);break;
+		case 'GABF':GABF_DET($ReportLocArry,$pdf);break;
+		case 'GAUST':GAUST_DET($ReportLocArry,$pdf);break;
+		case 'GALUST':GALUST_DET($ReportLocArry,$pdf);break;
+		case 'GANPDES':GANPDES_DET($ReportLocArry,$pdf);break;
+		case 'GASWF':GASWF_DET($ReportLocArry,$pdf);break;
+		case 'GACLF':GACLF_DET($ReportLocArry,$pdf);break;
+		case 'GAHSI':GAHSI_DET($ReportLocArry,$pdf);break;
+		case 'GASPILLS':GASPILLS_DET($ReportLocArry,$pdf);break;
+		case 'GAVRP':GAVRP_DET($ReportLocArry,$pdf);break;
+		case 'GAUEC':GAUEC_DET($ReportLocArry,$pdf);break;
+
+		case 'ILUST':ILUST_DET($ReportLocArry, $pdf);break;
+		case 'ILLUST':ILLUST_DET($ReportLocArry, $pdf);break;
+		case 'ILSRP':ILSRP_DET($ReportLocArry,$pdf);break;
+		case 'ILSPILLS':ILSPILLS_DET($ReportLocArry,$pdf);break;	
+		case 'ILCLEANERS':ILCLEANERS_DET($ReportLocArry,$pdf);break;		
+		case 'ILAIRS':ILAIRS_DET($ReportLocArry,$pdf);break;
+		case 'ILCDDLF':ILCDDLF_DET($ReportLocArry,$pdf);break;
+		case 'ILSRAP':ILSRAP_DET($ReportLocArry,$pdf);break;
+		case 'ILCDL':ILCDL_DET($ReportLocArry,$pdf);break;
+		case 'ILLUSTFUND':ILLUSTFUND_DET($ReportLocArry,$pdf);break;
+		case 'ILNPDES':ILNPDES_DET($ReportLocArry,$pdf);break;
+		case 'ILSC':ILSC_DET($ReportLocArry,$pdf);break;
+		case 'ILCOMPOST':ILCOMPOST_DET($ReportLocArry,$pdf);break;
+		case 'ILRAD':ILRAD_DET($ReportLocArry,$pdf);break;
+		case 'ILTRANSFER':ILTRANSFER_DET($ReportLocArry,$pdf);break;
+		case 'ILMEDWASTE':ILMEDWASTE_DET($ReportLocArry,$pdf);break;
+		case 'ILLANDFILLS':ILLANDFILLS_DET($ReportLocArry,$pdf);break;
+
+		case 'LAUST':LAUST_DET($ReportLocArry,$pdf);break;
+		case 'LAHLUST':LAHLUST_DET($ReportLocArry,$pdf);break;
+		case 'LAWP':LAWP_DET($ReportLocArry,$pdf);break;
+		case 'LALUST':LALUST_DET($ReportLocArry,$pdf);break;
+		case 'LANLRUST':LANLRUST_DET($ReportLocArry,$pdf);break;
+		case 'LAVRP':LAVRP_DET($ReportLocArry,$pdf);break;
+		case 'LADCR':LADCR_DET($ReportLocArry,$pdf);break;
+		case 'LASPILLS':LASPILLS_DET($ReportLocArry,$pdf);break;
+		case 'LACPI':LACPI_DET($ReportLocArry, $pdf);break;
+		case 'LAWASTETIRE':LAWASTETIRE_DET($ReportLocArry,$pdf);break;
+		case 'LAASBESTOS':LAASBESTOS_DET($ReportLocArry,$pdf);break;
+		case 'LAADS':LAADS_DET($ReportLocArry,$pdf);break;
+		case 'LAPBF':LAPBF_DET($ReportLocArry,$pdf);break;
+		case 'LAIC':LAIC_DET($ReportLocArry,$pdf);break;
+		case 'LAMBF':LAMBF_DET($ReportLocArry,$pdf);break;
+		case 'LARCSS':LARCSS_DET($ReportLocArry,$pdf);break;
+		case 'LASWLF':LASWLF_DET($ReportLocArry,$pdf);break;
+		case 'LALIENS':LALIENS_DET($ReportLocArry,$pdf);break;
+		case 'LARCY':LARCY_DET($ReportLocArry,$pdf);break;
+		case 'LAWBF':LAWBF_DET($ReportLocArry,$pdf);break;
+
+		case 'MNPBF':MNPBF_DET($ReportLocArry, $pdf);break;
+		case 'MNUAST':MNUAST_DET($ReportLocArry, $pdf);break;
+		case 'MNLUAST':MNLUAST_DET($ReportLocArry, $pdf);break;
+		case 'MNSRS':MNSRS_DET($ReportLocArry, $pdf);break;
+		case 'MNVICP':MNVICP_DET($ReportLocArry, $pdf);break;
+		case 'MNAGSPILLS':MNAGSPILLS_DET($ReportLocArry, $pdf);break;
+		case 'MNSF':MNSF_DET($ReportLocArry, $pdf);break;
+		case 'MNHWGS':MNHWGS_DET($ReportLocArry,$pdf);break;
+		case 'MNWDP':MNWDP_DET($ReportLocArry,$pdf);break;
+		case 'MNUNPERMDUMPS':MNUNPERMDUMPS_DET($ReportLocArry,$pdf);break;
+		case 'MNRECYCLERS':MNRECYCLERS_DET($ReportLocArry,$pdf);break;
+		case 'MNAIRS':MNAIRS_DET($ReportLocArry,$pdf);break;
+		case 'MNIC':MNIC_DET($ReportLocArry,$pdf);break;
+		case 'MNPCASPILLS':MNPCASPILLS_DET($ReportLocArry,$pdf);break;
+		case 'MNCONTINGENCIES':MNCONTINGENCIES_DET($ReportLocArry,$pdf);break;
+		case 'MNCERCLIS':MNCERCLIS_DET($ReportLocArry,$pdf);break;
+		case 'MNHWCS':MNHWCS_DET($ReportLocArry,$pdf);break;
+		case 'MNSAS':MNSAS_DET($ReportLocArry,$pdf);break;
+		case 'MNSWUP':MNSWUP_DET($ReportLocArry,$pdf);break;
+		case 'MNSWF':MNSWF_DET($ReportLocArry,$pdf);break;
+		case 'MNPVICP':MNPVICP_DET($ReportLocArry,$pdf);break;
+		case 'MNPBRLF':MNPBRLF_DET($ReportLocArry,$pdf);break;
+		case 'MNHWTSDS':MNHWTSDS_DET($ReportLocArry,$pdf);break;
+		case 'MNCLEANERS':MNCLEANERS_DET($ReportLocArry,$pdf);break;
+		case 'MNFEEDLOT':MNFEEDLOT_DET($ReportLocArry,$pdf);break;
+		case 'MNCLF':MNCLF_DET($ReportLocArry,$pdf);break;
+		case 'MNCDL':MNCDL_DET($ReportLocArry,$pdf);break;
+		case 'MNCAFO':MNCAFO_DET($ReportLocArry,$pdf);break;
+		case 'MNBULKSTORAGE':MNBULKSTORAGE_DET($ReportLocArry,$pdf);break;
+		case 'MNCSTF':MNCSTF_DET($ReportLocArry,$pdf);break;
+
+		case 'NCAFO':NCAFO_DET($ReportLocArry, $pdf);break; //baki
+		case 'NCAIRS':NCAIRS_DET($ReportLocArry, $pdf);break; 
+		case 'NCBF':NCBF_DET($ReportLocArry, $pdf);break; 
+		case 'NCDSCASITES':NCDSCASITES_DET($ReportLocArry, $pdf);break; 
+		case 'NCHISTLF':NCHISTLF_DET($ReportLocArry, $pdf);break; 
+		case 'NCHSDS':NCHSDS_DET($ReportLocArry, $pdf);break; 
+		case 'NCIHS':NCIHS_DET($ReportLocArry, $pdf);break; 
+		case 'NCLAST':NCLAST_DET($ReportLocArry, $pdf);break; 
+		case 'NCLUR':NCLUR_DET($ReportLocArry, $pdf);break; 
+		case 'NCLUST':NCLUST_DET($ReportLocArry, $pdf);break; 
+		case 'NCLUSTFUND':NCLUSTFUND_DET($ReportLocArry, $pdf);break; 
+		case 'NCNPDES':NCNPDES_DET($ReportLocArry, $pdf);break; 
+		case 'NCPWS':NCPWS_DET($ReportLocArry, $pdf);break; //baki
+		case 'NCSPILLS':NCSPILLS_DET($ReportLocArry, $pdf);break; 
+		case 'NCSWF':NCSWF_DET($ReportLocArry, $pdf);break; 
+		case 'NCUST':NCUST_DET($ReportLocArry, $pdf);break; 
+		case 'NCVAP':NCVAP_DET($ReportLocArry, $pdf);break; 
+
+		case 'NDRST':NDRST_DET($ReportLocArry, $pdf);break;
+		case 'NDUAST':NDUAST_DET($ReportLocArry, $pdf);break;
+		case 'NDLRST':NDLRST_DET($ReportLocArry, $pdf);break;
+		case 'NDAIRS':NDAIRS_DET($ReportLocArry,$pdf);break;
+		case 'NDBF':NDBF_DET($ReportLocArry,$pdf);break;
+		case 'NDNDPDES':NDNDPDES_DET($ReportLocArry,$pdf);break;
+		case 'NDFEEDLOT':NDFEEDLOT_DET($ReportLocArry,$pdf);break;
+		case 'NDGASPLANTS':NDGASPLANTS_DET($ReportLocArry,$pdf);break;
+		case 'NDSPWLF':NDSPWLF_DET($ReportLocArry,$pdf);break;
+		case 'NDMSWLF':NDMSWLF_DET($ReportLocArry,$pdf);break;
+		case 'NDSWFPCS':NDSWFPCS_DET($ReportLocArry,$pdf);break;
+		case 'NDIWLF':NDIWLF_DET($ReportLocArry,$pdf);break;
+		case 'NDWW':NDWW_DET($ReportLocArry,$pdf);break; //Table pending
+
+		case 'NMLUST':NMLUST_DET($ReportLocArry,$pdf);break;
+		case 'NMPST':NMPST_DET($ReportLocArry,$pdf);break;
+		case 'NMUST':NMUST_DET($ReportLocArry,$pdf);break;
+		case 'NMLST':NMLST_DET($ReportLocArry,$pdf);break;
+		case 'NMAST':NMAST_DET($ReportLocArry,$pdf);break;
+		case 'NMCEPCS':NMCEPCS_DET($ReportLocArry,$pdf);break;
+		case 'NMCDL':NMCDL_DET($ReportLocArry,$pdf);break;
+		case 'NMVRP':NMVRP_DET($ReportLocArry,$pdf);break;
+		case 'NMDPERMITS':NMDPERMITS_DET($ReportLocArry,$pdf);break;
+		case 'NMCOALF':NMCOALF_DET($ReportLocArry,$pdf);break;
+		case 'NMSWLF':NMSWLF_DET($ReportLocArry,$pdf);break;
+		case 'NMRCY':NMRCY_DET($ReportLocArry,$pdf);break;
+		case 'NMIC':NMIC_DET($ReportLocArry,$pdf);break;
+		case 'NMUS':NMUS_DET($ReportLocArry,$pdf);break;
+
+		case 'NVUST':NVUST_DET($ReportLocArry, $pdf);break;
+		case 'NVLUST':NVLUST_DET($ReportLocArry, $pdf);break;
+		case 'NVAST':NVAST_DET($ReportLocArry, $pdf);break;
+		case 'NVTIERII':NVTIERII_DET($ReportLocArry, $pdf);break;
+		case 'NVSPILLS':NVSPILLS_DET($ReportLocArry,$pdf);break;
+		case 'NVNPDES':NVNPDES_DET($ReportLocArry,$pdf);break;
+		case 'NVRECYCLERS':NVRECYCLERS_DET($ReportLocArry,$pdf);break;
+		case 'NVCCSWLF':NVCCSWLF_DET($ReportLocArry,$pdf);break;
+		case 'NVSWF':NVSWF_DET($ReportLocArry,$pdf);break;
+		case 'NVHWRECYCLERS':NVHWRECYCLERS_DET($ReportLocArry,$pdf);break;
+		case 'NVWCUST':NVWCUST_DET($ReportLocArry,$pdf);break;
+		case 'NVWCAIRS':NVWCAIRS_DET($ReportLocArry,$pdf);break;
+		case 'NVWCLUST':NVWCLUST_DET($ReportLocArry,$pdf);break;
+		case 'NVVCP':NVVCP_DET($ReportLocArry,$pdf);break;
+		case 'NVBF':NVBF_DET($ReportLocArry,$pdf);break;
+
+		case 'OHNPDES':OHNPDES_DET($ReportLocArry,$pdf);break;
+		case 'OHUST':OHUST_DET($ReportLocArry,$pdf);break;
+		case 'OHLUST':OHLUST_DET($ReportLocArry,$pdf);break;
+		case 'OHVAPS':OHVAPS_DET($ReportLocArry,$pdf);break;
+		case 'OHSWF':OHSWF_DET($ReportLocArry,$pdf);break;
+		case 'OHSPILLS':OHSPILLS_DET($ReportLocArry,$pdf);break;
+		case 'OHBF':OHBF_DET($ReportLocArry,$pdf);break;
+		case 'OHSC':OHSC_DET($ReportLocArry,$pdf);break;
+		case 'OHAIRS':OHAIRS_DET($ReportLocArry,$pdf);break;
+
+		case 'OKAIRS':OKAIRS_DET($ReportLocArry,$pdf);break;
+		case 'OKTIERII':OKTIERII_DET($ReportLocArry,$pdf);break;
+		case 'OKUAST':OKUAST_DET($ReportLocArry,$pdf);break;
+		case 'OKIC':OKIC_DET($ReportLocArry,$pdf);break;
+		case 'OKBF':OKBF_DET($ReportLocArry,$pdf);break;
+		case 'OKVCP':OKVCP_DET($ReportLocArry,$pdf);break;
+		case 'OKLUAST':OKLUAST_DET($ReportLocArry,$pdf);break;
+		case 'OKBFPR':OKBFPR_DET($ReportLocArry,$pdf);break;
+		case 'OKDCR':OKDCR_DET($ReportLocArry,$pdf);break;
+		case 'OKSWF':OKSWF_DET($ReportLocArry,$pdf);break;
+
+		case 'SCHOOLS':SCHOOLS_DET($ReportLocArry,$pdf);break;
+		case 'TARL':TARL_DET($ReportLocArry, $pdf);break;
+		case 'TRINDIANRES':TRINDIANRES_DET($ReportLocArry,$pdf);break;
+
+		case 'TRUSTR04':TRUSTR04_DET($ReportLocArry,$pdf);break;  
+		case 'TRLUSTR04':TRLUSTR04_DET($ReportLocArry,$pdf);break;
+		case 'TRUSTR08':TRUSTR08_DET($ReportLocArry,$pdf);break;
+		case 'TRLUSTR08':TRLUSTR08_DET($ReportLocArry,$pdf);break;
+		case 'TRUSTR06':TRUSTR06_DET($ReportLocArry,$pdf);break;
+		case 'TRLUSTR05':TRLUSTR05_DET($ReportLocArry,$pdf);break;
+		case 'TRUSTR05':TRUSTR05_DET($ReportLocArry,$pdf);break;
+		case 'TRLUSTR06':TRLUSTR06_DET($ReportLocArry,$pdf);break;
+		case 'TRLUSTR09':TRLUSTR09_DET($ReportLocArry,$pdf);break;
+		case 'TRUSTR09':TRUSTR09_DET($ReportLocArry,$pdf);break;
+		case 'TRTORRESDUMPSITES':TRTORRESDUMPSITES_DET($ReportLocArry,$pdf);break;
+		case 'TRODINDIAN':USODINDIAN_DET($ReportLocArry,$pdf);break;
+
+		case 'TXIHW':TXIHW_DET($ReportLocArry,$pdf);break;
+		case 'TXTIERII':TXTIERII_DET($ReportLocArry,$pdf);break;
+		case 'TXLPST':TXLPST_DET($ReportLocArry,$pdf);break;
+		case 'TXPST':TXPST_DET($ReportLocArry,$pdf);break;
+		case 'TXVCP':TXVCP_DET($ReportLocArry,$pdf);break;
+		case 'TXDCR':TXDCR_DET($ReportLocArry,$pdf);break;
+		case 'TXNDD':TXNDD_DET($ReportLocArry,$pdf);break;
+		case 'TXMNGDAREAS':TXMNGDAREAS_DET($ReportLocArry,$pdf);break;
+		case 'TXTCEQ':TXTCEQ_DET($ReportLocArry,$pdf);break;
+		case 'TXHGSD':TXHGSD_DET($ReportLocArry,$pdf);break;
+		case 'TXWUD':TXWUD_DET($ReportLocArry,$pdf);break;
+		case 'TXSSDRD':TXSSDRD_DET($ReportLocArry,$pdf);break;
+		case 'TXTWDB':TXTWDB_DET($ReportLocArry,$pdf);break;
+		case 'TXSDRD':TXSDRD_DET($ReportLocArry, $pdf);break;
+		case 'TXWMRF':TXWMRF_DET($ReportLocArry, $pdf);break;
+		case 'TXSPILLS':TXSPILLS_DET($ReportLocArry, $pdf);break;
+		case 'TXCALF':TXCALF_DET($ReportLocArry, $pdf);break;
+		case 'TXNOV':TXNOV_DET($ReportLocArry, $pdf);break;
+		case 'TXRWS':TXRWS_DET($ReportLocArry,$pdf);break;
+		case 'TXLIENS':TXLIENS_DET($ReportLocArry,$pdf);break;
+		case 'TXLPG':TXLPG_DET($ReportLocArry,$pdf);break;
+		case 'TXMSWLF':TXMSWLF_DET($ReportLocArry,$pdf);break;
+		case 'TXPIHW':TXIHW_DET($ReportLocArry,$pdf);break;
+		case 'TXHISTGWCC':TXHISTGWCC_DET($ReportLocArry,$pdf);break;
+		case 'TXMSD':TXMSD_DET($ReportLocArry,$pdf);break;
+		case 'TXLANDAPP':TXLANDAPP_DET($ReportLocArry,$pdf);break;
+		case 'TXSIEC01':TXSIEC01_DET($ReportLocArry,$pdf);break;
+		case 'TXEAP':TXEAP_DET($ReportLocArry,$pdf);break;
+		case 'TXGWCC':TXGWCC_DET($ReportLocArry,$pdf);break;
+		case 'TXIOP':TXIOP_DET($ReportLocArry,$pdf);break;
+ 		case 'TXSF':TXSF_DET($ReportLocArry,$pdf);break;
+ 		case 'TXAPAR':TXAPAR_DET($ReportLocArry,$pdf);break;
+ 		case 'TXBSA':TXBSA_DET($ReportLocArry,$pdf);break;
+ 		case 'TXRRCVCP':TXRRCVCP_DET($ReportLocArry,$pdf);break;
+ 		case 'TXSTCV':TXSTCV_DET($ReportLocArry,$pdf);break;
+ 		case 'TXAUSTINHISTUST':TXAUSTINHISTUST_DET($ReportLocArry,$pdf);break;
+
+		case 'USRCRAGR06':USRCRAGR_DET($ReportLocArry,$pdf);break;
+		case 'USNFRAP':USNFRAP_DET($ReportLocArry, $pdf);break;
+		case 'USCERCLIS':USCERCLIS_DET($ReportLocArry, $pdf);break;
+		case 'USRCRAGR09':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USPCSR09':USPCSR_DET($ReportLocArry, $pdf);break;
+		case 'USFRSLA':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USNLRRCRAG':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USNWIS':USNWIS_DET($ReportLocArry,$pdf);break;
+		case 'USAIRSAFS':USAFS_DET($ReportLocArry, $pdf);break;
+		case 'USFRSCO':USFRS_DET($ReportLocArry, $pdf);break;
+		case 'USBRS':USBRS_DET($ReportLocArry, $pdf);break;
+		case 'USDOCKETS':USDOCKETS_DET($ReportLocArry, $pdf);break;
+		case 'USICIS':USICIS_DET($ReportLocArry, $pdf);break;
+		case 'USNLRRCRAT':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRAGR08':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRASC':USRCRASC_DET($ReportLocArry, $pdf);break;
+		case 'USTRI':USTRI_DET($ReportLocArry, $pdf);break;
+		case 'USPCSR08':USPCSR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRAC':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRAT':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRAGR05':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USFRSTX':USFRS_DET($ReportLocArry, $pdf);break;
+		case 'USICISNPDES':USICISNPDES_DET($ReportLocArry,$pdf);break;
+		case 'USNPDESR06':USNPDES_DET($ReportLocArry, $pdf);break;
+		case 'USERNSTX':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USHMIRSR06':USHMIRS_DET($ReportLocArry,$pdf);break;
+		case 'USERNSLA':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USPCSR06':USPCSR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRANGR09':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRANGR08':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRANGR06':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRANGR05':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRANGR04':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USTSCA':USTSCA_DET($ReportLocArry, $pdf);break;
+		case 'USERNSCA':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USFRSCA':USFRS_DET($ReportLocArry, $pdf);break;
+		case 'USFRSIL':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USFRSAZ':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USDNPL':USDNPL_DET($ReportLocArry,$pdf);break;
+		case 'USFRSWI':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USNCDBI':USNCDBI_DET($ReportLocArry,$pdf);break;
+		case 'USERNSAZ':USERNS_DET($ReportLocArry,$pdf);break;
+		case 'USMLTS':USMLTS_DET($ReportLocArry,$pdf);break;
+		case 'USHMIRSR09':USHMIRS_DET($ReportLocArry,$pdf);break;
+		case 'USNCDBC':USNCDBC_DET($ReportLocArry,$pdf);break;
+		case 'USPADS':USPADS_DET($ReportLocArry,$pdf);break;
+		case 'USNPDESR09':USNPDES_DET($ReportLocArry, $pdf);break;
+		case 'USNPL':USNPL_DET($ReportLocArry,$pdf);break;
+		case 'USFRSAR':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USBF':USBF_DET($ReportLocArry,$pdf);break;
+		case 'USERNSAR':USERNS_DET($ReportLocArry,$pdf);break;
+		case 'USCDL':USCDL_DET($ReportLocArry,$pdf);break;
+		case 'USSSTS':USSSTS_DET($ReportLocArry,$pdf);break;
+		case 'USDOD':USDOD_DET($ReportLocArry,$pdf);break;
+		case 'USERNSCO':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USHMIRSR08':USHMIRS_DET($ReportLocArry,$pdf);break;
+		case 'USRODS':USRODS_DET($ReportLocArry,$pdf);break;
+		case 'USLUCIS':USLUCIS_DET($ReportLocArry,$pdf);break;
+		case 'USODI':USODI_DET($ReportLocArry,$pdf);break;
+		case 'USFUDS':USFUDS_DET($ReportLocArry,$pdf);break;
+		case 'USEC':USEC_DET($ReportLocArry,$pdf);break;
+		case 'USFRSFL':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USPCSR04':USPCSR_DET($ReportLocArry, $pdf);break;
+		case 'USRCRAGR04':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USNPDESR04':USNPDES_DET($ReportLocArry, $pdf);break;
+		case 'USHMIRSR04':USHMIRS_DET($ReportLocArry,$pdf);break;
+		case 'USERNSFL':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USNPDESR08':USNPDES_DET($ReportLocArry, $pdf);break;
+		case 'USNPDESR05':USNPDES_DET($ReportLocArry, $pdf);break;
+		case 'USHMIRSR05':USHMIRS_DET($ReportLocArry,$pdf);break;
+		case 'USPCSR05':USPCSR_DET($ReportLocArry, $pdf);break;
+		case 'USFRSNM':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USERNSNM':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USSFLIENS':USSFLIENS_DET($ReportLocArry,$pdf);break;
+		case 'USERNSNV':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USFRSNV':USFRS_DET($ReportLocArry, $pdf);break;
+		case 'USFRSND':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USFRSWY':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USERNSWY':USERNS_DET($ReportLocArry,$pdf);break;
+		case 'USNLRRCRAC':USRCRAGR_DET($ReportLocArry, $pdf);break;
+		case 'USPNPL':USPNPL_DET($ReportLocArry,$pdf);break;
+		case 'USFRSOK':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USERNSOK':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USFRSMN':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USHISTPST':USHISTPST_DET($ReportLocArry,$pdf);break;
+		case 'USFRSGA':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USERNSGA':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USERNSOH':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USFRSOH':USFRS_DET($ReportLocArry,$pdf);break;
+		case 'USERNSNC':USERNS_DET($ReportLocArry, $pdf);break;
+		case 'USFRSNC':USFRS_DET($ReportLocArry,$pdf);break;
+
+		case 'WIERP':WIERP_DET($ReportLocArry,$pdf);break;
+		case 'WILUST':WILUST_DET($ReportLocArry,$pdf);break;
+		case 'WISHWIS':WISHWIS_DET($ReportLocArry,$pdf);break; 
+		case 'WIST':WIST_DET($ReportLocArry,$pdf);break;
+		case 'WIHISTWDS':WIHISTWDS_DET($ReportLocArry,$pdf);break;
+		case 'WISPILLS':WISPILLS_DET($ReportLocArry,$pdf);break;
+		case 'WIBEAP':WIBEAP_DET($ReportLocArry,$pdf);break;
+		case 'WIAGSPILLS':WIAGSPILLS_DET($ReportLocArry,$pdf);break;
+		case 'WIAC':WIAC_DET($ReportLocArry,$pdf);break;
+		case 'WINAR':WINAR_DET($ReportLocArry,$pdf);break;
+		case 'WIGP':WIGP_DET($ReportLocArry,$pdf);break;
+		case 'WILUC':WILUC_DET($ReportLocArry,$pdf);break;
+		case 'WIBFSAG':WIBFSAG_DET($ReportLocArry,$pdf);break;
+		case 'WICLEANERS':WICLEANERS_DET($ReportLocArry,$pdf);break;
+		case 'WIDERF':WIDERF_DET($ReportLocArry,$pdf);break;
+		case 'WIVPLE':WIVPLE_DET($ReportLocArry,$pdf);break;
+
+		case 'WYST':WYST_DET($ReportLocArry,$pdf);break;
+		case 'WYLST':WYLST_DET($ReportLocArry,$pdf);break;
+		case 'WYORPHANS':WYORPHANS_DET($ReportLocArry,$pdf);break;
+		case 'WYVRPBF':WYVRPBF_DET($ReportLocArry,$pdf);break;
+		case 'WYIC':WYIC_DET($ReportLocArry,$pdf);break;
+		case 'WYSWF':WYSWF_DET($ReportLocArry,$pdf);break;
+		/***************************/
+		/*
+		case 'AZWW':AZWW_DET($ReportLocArry,$pdf);break;
+		
+
+
+		case 'CANPL':CANPL_DET($ReportLocArry,$pdf);break;
+		case 'CAPARKS':CAPARKS_DET($ReportLocArry,$pdf);break;
+		case 'CASPO':CASPO_DET($ReportLocArry,$pdf);break;
+		case 'CACNDDB':CACNDDB_DET($ReportLocArry,$pdf);break;
+		case 'CADWRWELLS':CADWRWELLS_DET($ReportLocArry,$pdf);break;
+		case 'CALNDMKS':CALNDMKS_DET($ReportLocArry,$pdf);break;
+
+		case 'CODCTTFL':CODCTTFL_DET($ReportLocArry,$pdf);break;
+		case 'CODCTTF':CODCTTF_DET($ReportLocArry,$pdf);break;
+		case 'CODWRWELLS':CODWRWELLS_DET($ReportLocArry,$pdf);break;
+		case 'COLAST':COLAST_DET($ReportLocArry,$pdf);break;
+		case 'COLUST':COLUST_DET($ReportLocArry,$pdf);break;
+		case 'COPITS':COPITS_DET($ReportLocArry,$pdf);break;
+		case 'COST':COST_DET($ReportLocArry,$pdf);break;
+		
+		case 'FLCONTROLS':FLCONTROLS_DET($ReportLocArry,$pdf);break;
+
+		case 'HGACUNIVCOLLEGES':HGACUNIVCOLLEGES_DET($ReportLocArry,$pdf);break;
+		case 'HGACTRAUMACTRS':HGACTRAUMACTRS_DET($ReportLocArry,$pdf);break;
+		case 'HGACSCHOOLS':HGACSCHOOLS_DET($ReportLocArry,$pdf);break;
+		case 'HGACPARKS':HGACPARKS_DET($ReportLocArry,$pdf);break;
+		case 'HGACMUSEUMS':HGACMUSEUMS_DET($ReportLocArry,$pdf);break;
+		case 'HGACLIBRARIES':HGACLIBRARIES_DET($ReportLocArry,$pdf);break;
+		case 'HGACLEARNCTRS':HGACLEARNCTRS_DET($ReportLocArry,$pdf);break;
+		case 'HGACHOSPITALS':HGACHOSPITALS_DET($ReportLocArry,$pdf);break;
+		case 'HGACCEMETERIES':HGACCEMETERIES_DET($ReportLocArry,$pdf);break;
+
+		case 'ILWW':ILWW_DET($ReportLocArry,$pdf);break;
+		case 'ILUSTR10':ILUSTR10_DET($ReportLocArry,$pdf);break;
+		case 'ILUSTR08':ILUSTR08_DET($ReportLocArry,$pdf);break;
+		case 'ILUSTR07':ILUSTR07_DET($ReportLocArry,$pdf);break;
+		case 'ILUSTR05':ILUSTR05_DET($ReportLocArry,$pdf);break;
+		case 'ILUSTR04':ILUSTR04_DET($ReportLocArry,$pdf);break;
+		case 'ILUSTR02':ILUSTR02_DET($ReportLocArry,$pdf);break;
+		case 'ILUSTR01':ILUSTR01_DET($ReportLocArry,$pdf);break;
+
+		case 'MNTIERII':MNTIERII_DET($ReportLocArry,$pdf);break;		
+		case 'MNESI':MNESI_DET($ReportLocArry,$pdf);break;
+		case 'MNCWIWELLS':MNCWIWELLS_DET($ReportLocArry,$pdf);break;
+		case 'MNCONTSITES':MNCONTSITES_DET($ReportLocArry,$pdf);break;
+		case 'MNCONTINGENCY':MNCONTINGENCY_DET($ReportLocArry,$pdf);break;
+		
+		case 'NDLUST':NDLUST_DET($ReportLocArry,$pdf);break;
+		case 'NDUST':NDUST_DET($ReportLocArry,$pdf);break;
+
+		case 'NVPTD':NVPTD_DET($ReportLocArry,$pdf);break;
+		case 'NVWW':NVWW_DET($ReportLocArry,$pdf);break;
+
+		case 'TXHISTCEM':TXHISTCEM_DET($ReportLocArry,$pdf);break;
+		case 'TXHSTMRKS':TXHSTMRKS_DET($ReportLocArry,$pdf);break;
+		case 'TXKARST':TXKARST_DET($ReportLocArry,$pdf);break;
+		case 'TXWW':TXWW_DET($ReportLocArry,$pdf);break;
+		case 'TXFBSD':TXFBSD_DET($ReportLocArry,$pdf);break;
+		case 'TXUSGS':TXUSGS_DET($ReportLocArry,$pdf);break;
+
+		case 'USCELLTOWERS':USCELLTOWERS_DET($ReportLocArry,$pdf);break;
+		case 'USCRITHABITAT':USCRITHABITAT_DET($ReportLocArry,$pdf);break;
+		case 'USODINDIAN':USODINDIAN_DET($ReportLocArry,$pdf);break;
+		case 'USILPSTR06':USILPSTR06_DET($ReportLocArry,$pdf);break;
+		case 'USILPSTR09':USILPSTR09_DET($ReportLocArry,$pdf);break;
+		case 'USIPSTR06':USIPSTR06_DET($ReportLocArry,$pdf);break;
+		case 'USIPSTR09':USIPSTR09_DET($ReportLocArry,$pdf);break;
+
+		case 'WISWLF':WISWLF_DET($ReportLocArry,$pdf);break;
+
+		case 'CEMETERIES':CEMETERIES_DET($ReportLocArry,$pdf);break;
+		case 'CHURCHES':CHURCHES_DET($ReportLocArry,$pdf);break;
+		case 'DELRIOPARKS':DELRIOPARKS_DET($ReportLocArry,$pdf);break;
+		case 'DELRIOSCHOOL':DELRIOSCHOOL_DET($ReportLocArry,$pdf);break;
+		case 'HIDALGOPARKS':HIDALGOPARKS_DET($ReportLocArry,$pdf);break;
+		case 'HIDSCHOOLS':HIDSCHOOLS_DET($ReportLocArry,$pdf);break;
+		case 'HIDTRANSIT':HIDTRANSIT_DET($ReportLocArry,$pdf);break;
+		case 'HOSPITALS':HOSPITALS_DET($ReportLocArry,$pdf);break;
+		case 'NURSINGHOMES':NURSINGHOMES_DET($ReportLocArry,$pdf);break;
+		case 'HSTBLDGS':HSTBLDGS_DET($ReportLocArry,$pdf);break;
+		case 'HSTLNDMKS':HSTLNDMKS_DET($ReportLocArry,$pdf);break;
+		case 'HSTPLACES':HSTPLACES_DET($ReportLocArry,$pdf);break;
+		case 'PCB':PCB_DET($ReportLocArry,$pdf);break;
+		case 'PRESRVTNS':PRESRVTNS_DET($ReportLocArry,$pdf);break;
+		case 'REFUGES':REFUGES_DET($ReportLocArry,$pdf);break;
+		case 'RIVERS':RIVERS_DET($ReportLocArry,$pdf);break;
+		case 'RRCVCP':RRCVCP_DET($ReportLocArry,$pdf);break;
+		case 'SUPFUND':SUPFUND_DET($ReportLocArry,$pdf);break;
+		case 'WWLA':WWLA_DET($ReportLocArry,$pdf);break;
+		case 'WWLADOT':WWLADOT_DET($ReportLocArry,$pdf);break;
+		case 'WWLADOTSUM':WWLADOTSUM_DET($ReportLocArry,$pdf);break;
+		case 'WWNM':WWNM_DET($ReportLocArry,$pdf);break;
+		case 'WWNWIS':WWNWIS_DET($ReportLocArry,$pdf);break;
+		case 'WWNWISSUM':WWNWISSUM_DET($ReportLocArry,$pdf);break;
+		case 'WWOKWRB':WWOKWRB_DET($ReportLocArry,$pdf);break;
+		case 'RCRA':RCRA_DET($ReportLocArry,$pdf);break;
+		case 'AMTOWERS':AMTOWERS_DET($ReportLocArry,$pdf);break;
+		case 'EARZ':EARZ_DET($ReportLocArry,$pdf);break;
+		case 'FINDS':FINDS_DET($ReportLocArry,$pdf);break;
+		case 'HARRISCHURCHES':HARRISCHURCHES_DET($ReportLocArry,$pdf);break;
+		case 'HARRISGREENTRAILS':HARRISGREENTRAILS_DET($ReportLocArry,$pdf);break;
+		case 'HARRISHEALTHFACS':HARRISHEALTHFACS_DET($ReportLocArry,$pdf);break;
+		case 'HARRISPARKS':HARRISPARKS_DET($ReportLocArry,$pdf);break;
+		case 'HARRISSCHOOLS':HARRISSCHOOLS_DET($ReportLocArry,$pdf);break;
+		case 'HOUSTONHOSPITALS':HOUSTONHOSPITALS_DET($ReportLocArry,$pdf);break;
+		case 'HOUSTONLIBRARIES':HOUSTONLIBRARIES_DET($ReportLocArry,$pdf);break;
+		case 'HOUSTONPARKS':HOUSTONPARKS_DET($ReportLocArry,$pdf);break;
+		case 'INDIANRES':INDIANRES_DET($ReportLocArry,$pdf);break;
+		case 'IUSTR01PST':IUSTR01PST_DET($ReportLocArry,$pdf);break;
+		case 'IUSTR02PST':IUSTR02PST_DET($ReportLocArry,$pdf);break;
+		case 'IUSTR04PST':IUSTR04PST_DET($ReportLocArry,$pdf);break;
+		case 'IUSTR05PST':IUSTR05PST_DET($ReportLocArry,$pdf);break;
+		case 'IUSTR07PST':IUSTR07PST_DET($ReportLocArry,$pdf);break;
+		case 'IUSTR08PST':IUSTR08PST_DET($ReportLocArry,$pdf);break;
+		case 'IUSTR10PST':IUSTR10PST_DET($ReportLocArry,$pdf);break;
+		case 'WW':WW_DET($ReportLocArry,$pdf);break;
+		case 'WW_KS':WW_KS_DET($ReportLocArry,$pdf);break;
+		*/
+		
+	}
+
+	$pdf->setStrokeColor(0,0,0,1);
+	$YCord = $pdf->y-8;
+	$pdf->line(50,$YCord,550,$YCord);
+
+	return true;
+}
+
+
+/******************************/
+function DetailsPipeLine($pdf){
+		global $Config;
+		if(empty($Config['PagePipe'])){
+			$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+			$Config['PagePipe'] = $page;
+		}
+
+		$Config['LableTitleDest']++;
+		$AcronymTitle = 'Oil & Gas Pipeline Report';
+		$AcronymTitle = $AcronymTitle.'<C:rf:'.$AcronymTitle.'>';
+		HeaderTextBox($pdf,ucfirst($AcronymTitle));
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+		$Config['PipeDest'] = $Config['LableTitleDest']-1;
+		/**************************************/
+		 $sql = "select * from  txog_pipeline where orderid='".$Config['orderid']."' and jobid='".$Config['jobid']."' order by id";
+		$row= mysql_query($sql) or die(mysql_error());
+		$num = mysql_num_rows($row);
+   
+
+		if($num>0){
+			$Head1 = '<b>T4 PERMIT #</b>'; $Head2 = '<b>OPERATOR</b>'; $Head3 = '<b>SYSTEM NAME</b>'; $Head4 = '<b>COMMODITY</b>'; $Head5 = '<b>DIAMETER</b>'; $Head6 = '<b>STATUS</b>'; $Head7 = '<b>TYPE</b>';
+			$i=0;unset($data); unset($arryDef);
+
+			$pdf->setStrokeColor(0,0,0,1);
+			$YCord = $pdf->y-15;
+			$pdf->line(50,$YCord,550,$YCord);
+
+			$arryDef[$i][$Head1] = $Head1;$arryDef[$i][$Head2] = $Head2;$arryDef[$i][$Head3] = $Head3; $arryDef[$i][$Head4] = $Head4;$arryDef[$i][$Head5] = $Head5;$arryDef[$i][$Head6] = $Head6;$arryDef[$i][$Head7] = $Head7;
+			$data[] = $arryDef[$i];
+			$i++;
+			while($arrySite = mysql_fetch_array($row)){
+				$Status = ($arrySite['STATUS_CD']=='I')?('IN SERVICE'):('ABANDONED');
+
+				$CMD = $arrySite['COMMODITY1'];
+				if($CMD=='NG') $Type = 'GAS TRANSMISSION';
+				else if($CMD=='CRD') $Type = 'CRUDE TRANSMISSION';
+				else if($CMD=='LPG') $Type = 'CRUDE TRANSMISSION';
+				else $Type = 'PRODUCT LINES (NOT HIGHLY VOLATILE)';
+				
+				$arryDef[$i][$Head1] = $arrySite['T4PERMIT'];
+				$arryDef[$i][$Head2] = $arrySite['OPER_NM'];
+				$arryDef[$i][$Head3] = $arrySite['SYS_NM'];
+				$arryDef[$i][$Head4] = $arrySite['CMDTY_DESC'];
+				$arryDef[$i][$Head5] = $arrySite['DIAMETER'];
+				$arryDef[$i][$Head6] = $Status;
+				$arryDef[$i][$Head7] = $Type;
+				$data[] = $arryDef[$i];
+				$i++;
+			}
+	    $pdf->ezSetDy(-5);
+		 $pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left','width'=>'60'),$Head2=>array('justification'=>'left','width'=>'110'),$Head3=>array('justification'=>'left','width'=>'110'),$Head4=>array('justification'=>'left','width'=>'60'),$Head5=>array('justification'=>'left','width'=>'40'),$Head6=>array('justification'=>'left','width'=>'50')), 'shaded'=>1,'shadeCol'=>array(0.6,0.8,0.8),'showLines'=>0 , 'xPos' =>300 ,'width'=>500,'fontSize'=>6,'showHeadings'=>0, 'colGap'=>1, 'rowGap'=>2) );
+			$pdf->setStrokeColor(0,0,0,1);
+		}	
+
+}
+
+
+/******************************/
+function DetailsOilGas($ReportLocArry,$ArryAcronymTitle, $pdf){
+		global $Config;
+		if(empty($Config['PageOilGas'])){
+			$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+			$Config['PageOilGas'] = $page;
+		}
+
+		if($Config['OilGasType']=='LAOG') $Config['OilTitle'] = "Oil & Gas Wells (OG)"; 
+		else $Config['OilTitle'] = "Oil & Gas Well Report";
+
+		$Config['LableTitleDest']++;
+		$AcronymTitle = $Config['OilTitle'];
+		$AcronymTitle = $AcronymTitle.'<C:rf:'.$AcronymTitle.'>';
+		HeaderTextBox($pdf,$AcronymTitle);
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+		
+		$Config['OilGasDest'] = $Config['LableTitleDest']-1;
+		
+		switch($Config['OilGasType']){
+			case 'TXOG':TXOG_DET($ReportLocArry, $pdf);break;
+			case 'LAOG':LAOG_DET($ReportLocArry, $pdf);break;
+			case 'AROG':AROG_DET($ReportLocArry, $pdf);break;
+			case 'AZOG':AZOG_DET($ReportLocArry,$pdf);break;
+			case 'CAOG':CAOG_DET($ReportLocArry,$pdf);break;
+			case 'COOG':COOG_DET($ReportLocArry,$pdf);break;
+			case 'FLOG':FLOG_DET($ReportLocArry,$pdf);break;
+			case 'ILOG':ILOG_DET($ReportLocArry,$pdf);break;
+			case 'KSOG':KSOG_DET($ReportLocArry,$pdf);break;
+			case 'NMOG':NMOG_DET($ReportLocArry,$pdf);break;
+			case 'NVOG':NVOG_DET($ReportLocArry,$pdf);break;
+			case 'OKOG':OKOG_DET($ReportLocArry,$pdf);break;
+			case 'NDOG':NDOG_DET($ReportLocArry,$pdf);break;
+			case 'NCOG':NCOG_DET($ReportLocArry,$pdf);break;
+			case 'TXOGWELLS':TXOGWELLS_DET($ReportLocArry, $pdf);break;
+		}
+		
+
+}
+
+/******************************/
+function DefinitionRecord($FindingArry,$ArryDefinitionDesc,$ArryDefinitionDate, $AcronymDefinitionArray, $title,$pdf){
+	
+	$Head1 = 'ACRONYM'; //$Head2 = 'ACRONYM_DESC'; 
+
+	global $Config;
+
+	if(empty($Config['PageDef'])){
+		$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+		$Config['PageDef'] = $page;
+	}
+
+	if(sizeof($FindingArry)>0){
+		if($Config['DefLink']!=1){
+			$Config['LableTitleDest']++;
+			$DefinitionTitle = 'Environmental Records Definitions - '.$title;
+			$DefinitionTitle = $DefinitionTitle.'<C:rf:'.$DefinitionTitle.'>';
+			HeaderTextBox($pdf,$DefinitionTitle);
+			$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+			$Config['DefLink'] = 1;
+		}else{
+			$DefinitionTitle = 'Environmental Records Definitions - '.$title;
+			HeaderTextBox($pdf,$DefinitionTitle);
+		}
+
+
+		$i=0;
+		foreach ($FindingArry as $k => $v) {
+			unset($data);
+		    $Config['LableTitleDest']++;
+			$ACRONYM = $v['ACRONYM'];
+			$ACRONYMLAB = $v['ACRONYMLAB'].'<C:rf:'.$v['ACRONYMLAB'].'>';
+			
+			if(!empty($ArryDefinitionDate[$ACRONYM])) $VersionDate = $ArryDefinitionDate[$ACRONYM];
+			else if(!empty($v['VERSION']))$VersionDate = $v['VERSION'];
+			else $VersionDate = 'NR';
+
+			$arryDef[$i][$Head1] = "<b>".$ACRONYMLAB."</b>                              ".$v['DESCRIPTIO']."\n\nVERSION DATE: ".$VersionDate." ";
+			
+			$data[] = $arryDef[$i];
+			$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>8,'showHeadings'=>0, 'rowGap'=>5,'innerLineThickness'=>0) );
+
+			if(!empty($ArryDefinitionDesc[$ACRONYM])) $DefinitionDesc = $ArryDefinitionDesc[$ACRONYM];
+			else if(!empty($AcronymDefinitionArray[$ACRONYM]))$DefinitionDesc = $AcronymDefinitionArray[$ACRONYM];
+			else $DefinitionDesc = '';
+
+			$pdf->ezSetDy(-5);
+			$pdf->ezText($DefinitionDesc,9,array('justification'=>'left','left'=>20,'right'=>20,'spacing'=>1.3));
+			$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+
+			$pdf->ezSetDy(-20);
+			$i++;
+		}
+
+
+	}
+
+}
+
+/******************************/
+function FemaMapRecord($arryFemaDesc, $FemaZoneArry, $arryFemaZoneName, $arryFemaZoneDesc, $pdf){
+		global $Config;
+		$Head1 = 'FEMA'; $Head2 = 'FEMA_DESC'; 
+	
+		if(empty($Config['Paget'.$Head1])){
+			$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+			$Config['Paget'.$Head1] = $page;
+		}
+
+		$Title = 'FEMA Report';
+		$Title = $Title.'<C:rf:'.$Title.'>';
+		HeaderTextBox($pdf,$Title);
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+	
+		unset($data);
+		$arryDef[0][$Head1] = '<b>'.stripslashes($arryFemaDesc['DESC']).'</b>';
+		$data[] = $arryDef[0];
+		$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+		
+		$pdf->ezText("\n".stripslashes($arryFemaDesc['DESC_MEMO']),8,array('justification'=>'left','left'=>20,'right'=>20,'spacing'=>1.3));
+		$pdf->ezSetDy(-20);
+
+		unset($data);
+		$arryDef[0][$Head1] = '<b>FEMA Flood Zone Definitions Relevant to Map</b>';
+		$data[] = $arryDef[0];
+		$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>175 ,'width'=>240, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+		$pdf->ezSetDy(-8);
+		foreach($FemaZoneArry as $Zone){
+			unset($data);
+			$arryDef[$i][$Head1] = '<b>'.$Zone.'</b>';
+			$arryDef[$i][$Head2] = stripslashes($arryFemaZoneName[$Zone]);
+			$data[] = $arryDef[$i];
+			$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('width'=>'100')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+			$pdf->ezText(stripslashes($arryFemaZoneDesc[$Zone]),8,array('justification'=>'left','left'=>20,'right'=>20,'spacing'=>1.3));
+			$pdf->ezSetDy(-10);
+			$i++;
+		}
+		
+}
+
+/******************************/
+function NwiMapRecord($arryNwiDesc,$NwiAttribArry, $SystemArray, $NwiAttributePath, $pdf){
+		
+		global $Config;
+		$Head1 = 'NWI'; 
+
+		if(empty($Config['Paget'.$Head1])){
+			$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+			$Config['Paget'.$Head1] = $page;
+		}
+
+
+		$Title = 'NWI Report';
+		$Title = $Title.'<C:rf:'.$Title.'>';
+		HeaderTextBox($pdf,$Title);
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+
+		
+		unset($data);
+		$arryDef[0][$Head1] = '<b>'.stripslashes($arryNwiDesc['DESC']).'</b>';
+		$data[] = $arryDef[0];
+		$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+		
+		$pdf->ezText("\n".stripslashes($arryNwiDesc['DESC_MEMO']),8,array('justification'=>'left','left'=>20,'right'=>20,'spacing'=>1.3));
+		$pdf->ezSetDy(-20);
+
+		unset($data);
+		$arryDef[0][$Head1] = '<b>NWI Definitions Relevant to Map</b>';
+		$data[] = $arryDef[0];
+		$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>175 ,'width'=>240, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+		$pdf->ezSetDy(-8);
+
+	
+		if(sizeof($NwiAttribArry)>0){
+		foreach($NwiAttribArry as $Attribute){
+			unset($data);
+
+			$RevAttribute = strrev($Attribute);
+			$AttributeA = $Attribute[0];				
+			$AttributeB = $Attribute[0].$Attribute[1]; 
+			$AttributeC = $Attribute[1].$Attribute[2];  
+			$AttributeC2 = $Attribute[2].$Attribute[3]; 
+			$AttributeCS = $Attribute[3]; 
+			$AttributeW = $Attribute[4];	
+			$AttributeS = $RevAttribute[0];
+		
+			/***********************/
+			$system = $SystemArray['A'][$AttributeA];
+			$subsystem = $SystemArray['B'][$AttributeB];
+			$class = $SystemArray['C'][$AttributeC];
+			$subclass = $SystemArray['CS'][$AttributeCS];
+			if(empty($class)){
+				$class = $SystemArray['C'][$AttributeC2];
+			}
+			$water = $SystemArray['W'][$AttributeW];
+			$special = $SystemArray['S'][$AttributeS];
+
+			//echo $Attribute.' : '.$special.'<br>';
+			
+			if(!empty($system) || !empty($subsystem) || !empty($class) || !empty($water)){
+				$arryDef[$i][$Head1] = '<b>'.$Attribute.'</b>';
+				$data[] = $arryDef[$i];
+				$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+				$FinalSystem = '';
+				if(!empty($system)) $FinalSystem .= "SYSTEM: <b>".$system."</b>";
+				if(!empty($subsystem)) $FinalSystem .= "\nSUBSYSTEM: <b>".$subsystem."</b>";
+				if(!empty($class)) $FinalSystem .= "\nCLASS: <b>".$class."</b>";
+				if(!empty($subclass)) $FinalSystem .= "\nSUBCLASS: <b>".$subclass."</b>";
+				if(!empty($water)) $FinalSystem .= "\nWATER REGIME: <b>".$water."</b>";
+				if(!empty($special)) $FinalSystem .= "\nSPECIAL MODIFIER: <b>".$special."</b>";
+
+				$pdf->ezText($FinalSystem, 7, array('justification'=>'left','left'=>20,'right'=>20,'spacing'=>1.5));
+			}else{
+				$arryDef[$i][$Head1] = '<b>'.$Attribute.' - DIGITAL DATA NOT AVAILABLE</b>';
+				$data[] = $arryDef[$i];
+				$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+			}
+			$pdf->ezSetDy(-10);
+			$i++;
+		}
+		}else{
+			unset($data);
+			$arryDef[0][$Head1] = '<b>NWI ATTRIBUTES DISPLAYED BEYOND THE SEARCH RADIUS ARE NOT REPORTED</b>';
+			$data[] = $arryDef[0];
+			$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+			$pdf->ezSetDy(-8);
+		}
+
+		
+}
+
+/******************************/
+function SoilMapRecord($arrySoilDesc,$SoilAcronymArry, $SoilArryDet, $pdf){
+		global $Config;
+		
+		$PageTitle = 'SOIL Report';
+		$Head1 = 'Soil'; $Head2 = 'SOIL_DESC'; 
+	
+		if(empty($Config['Paget'.$Head1])){
+			$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+			$Config['Paget'.$Head1] = $page;
+		}
+
+		$Title = 'SOIL Report';
+		$Title = $Title.'<C:rf:'.$Title.'>';
+		HeaderTextBox($pdf,$Title);
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+		
+		unset($data);
+		$arryDef[0][$Head1] = '<b>'.stripslashes($arrySoilDesc['DESC']).'</b>';
+		$data[] = $arryDef[0];
+		$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('justification'=>'left')), 'shaded'=>0, 'showLines'=>2 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+		
+		$pdf->ezText("\n".stripslashes($arrySoilDesc['DESC_MEMO']),8,array('justification'=>'left','left'=>20,'right'=>20,'spacing'=>1.3));
+		$pdf->ezSetDy(-20);
+
+		$pdf->ezText("<u><b>Soil Code Definitions Relevant to Map</b></u>", 9, array('justification'=>'left', 'spacing'=>1.5));
+		if(sizeof($SoilAcronymArry['SoilCode'])>0){
+			for($i=0;$i<sizeof($SoilAcronymArry['SoilCode']);$i++){
+				unset($data);
+				$arryDef[$i][$Head1] = '<b>'.$SoilAcronymArry['SoilCode'][$i].'</b>';
+				$arryDef[$i][$Head2] = $SoilAcronymArry['SoilDesc'][$i].' ';
+				$data[] = $arryDef[$i];
+				$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('width'=>'60')), 'shaded'=>0, 'showLines'=>0 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+			}
+		}else if(sizeof($SoilArryDet)>0){
+			for($i=0;$i<sizeof($SoilArryDet);$i++){
+				unset($data);
+				$SoilArry = explode("_",$SoilArryDet[$i]);
+				$arryDef[$i][$Head1] = '<b>'.$SoilArry[0].' - </b>';
+				$arryDef[$i][$Head2] = '<b>DIGITAL DATA NOT AVAILABLE</b>';
+				$data[] = $arryDef[$i];
+				$pdf->ezTable($data,'','',array('cols'=>array($Head1=>array('width'=>'60')), 'shaded'=>0, 'showLines'=>0 , 'xPos' =>305 ,'width'=>500, 'fontSize'=>9,'showHeadings'=>0, 'rowGap'=>3) );
+			}
+
+		}
+		
+}
+
+
+function HeaderMap($pdf,$MapName){
+	$all = $pdf->openObject();
+	$pdf->saveState();
+
+	$pdf->setColor(255,255,255,1);		// Create white space for text
+	$pdf->filledRectangle(0,735,600,60);
+	$pdf->setColor(0,0,0,1);
+
+	$HeadX = 250;
+	if(strlen($MapName)>8) $HeadX = $HeadX - 15; 
+	$pdf->setLineStyle(1.7);
+	$MapTitle = ucfirst($MapName)." Map";
+	if($MapTitle=="Radius2K Map") $MapTitle="Radius Map 1";
+	if($MapTitle=="Radius1K Map") $MapTitle="Radius Map 2";
+
+	$pdf->addText($HeadX,758,14,"<i><b>".$MapTitle."</b></i>");
+	$pdf->rectangle(50,747,500,33);
+	$pdf->setLineStyle(1);
+
+	$pdf->restoreState();
+	$pdf->closeObject();
+	$pdf->addObject($all,'add');
+	return true;
+}
+
+/******************************/
+function DrawMapJpg($PdfJpgDir,$MapJpg, $pdf){
+	global $Config;
+	
+	if(file_exists($PdfJpgDir.$MapJpg)){
+		$MapName = str_replace(".jpg","",$MapJpg); 
+		if(empty($Config['Page'.$MapName])){
+			$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+			$Config['Page'.$MapName] = $page;
+		}
+		
+		$pdf->ezNewPage();
+		$Title = '.'.$Config['LableTitleDest'];
+		$Title = $Title.'<C:rf:'.$Title.'>';
+		$pdf->ezSetDy(60); $pdf->ezText($Title,2,array('justification'=>'left')); $pdf->ezSetDy(-60);
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+
+		$MapName = str_replace(".jpg","",$MapJpg);  
+		$MapName = str_replace("_".$Config['jobid'],"",$MapName); 
+		$SateliteLink = "<c:alink:".$Config['MapUrl']."><i>Click here to access Satelite view</i></c:alink>";
+
+		list($width_orig, $height_orig) = getimagesize($PdfJpgDir.$MapJpg);
+		if($width_orig > $height_orig){
+			$pdf->ezSetDy(-290);		//Type2 
+			$pdf->addJpegFromFile($PdfJpgDir.$MapJpg,-5,$pdf->y-110,612,"");			
+			HeaderMap($pdf,$MapName);
+			$pdf->setColor(255,255,255,1);		 // Create White Space at bottom of Image
+			$pdf->filledRectangle(25,322,550,65);		
+			$pdf->addText(230,350,9,"\n".$SateliteLink);		
+		}else{
+			$pdf->ezSetDy(-590);		
+			$pdf->addJpegFromFile($PdfJpgDir.$MapJpg,-5,$pdf->y-110,612,"");			
+			HeaderMap($pdf,$MapName);
+			$pdf->setColor(255,255,255,1);		 // Create White Space at bottom of Image
+			$pdf->filledRectangle(47,52,520,63);		
+			$pdf->addText(230,120,9,"\n".$SateliteLink);		
+		}
+		$pdf->setColor(0,0,0,1);
+
+	}
+
+}
+/******************************/
+function DrawMapJpg5555($PdfJpgDir,$MapJpg, $pdf){
+	global $Config;
+	
+	if(file_exists($PdfJpgDir.$MapJpg)){
+		$MapName = str_replace(".jpg","",$MapJpg); 
+		if(empty($Config['Page'.$MapName])){
+			$page=$pdf->ezWhatPageNumber($pdf->ezGetCurrentPageNumber());
+			$Config['Page'.$MapName] = $page;
+		}
+		
+		$pdf->ezNewPage();
+		$Title = '.'.$Config['LableTitleDest'];
+		$Title = $Title.'<C:rf:'.$Title.'>';
+		$pdf->ezSetDy(60); $pdf->ezText($Title,2,array('justification'=>'left')); $pdf->ezSetDy(-60);
+		$pdf->addDestination('label'.$Config['LableTitleDest'],'FitH','');
+
+
+		$pdf->ezSetDy(-590);		
+		$pdf->addJpegFromFile($PdfJpgDir.$MapJpg,-5,$pdf->y-110,612,"");
+	
+
+		$MapName = str_replace(".jpg","",$MapJpg);  // Create Heading Temp
+		$MapName = str_replace("_".$Config['jobid'],"",$MapName); 
+
+		HeaderMap($pdf,$MapName);
+		
+		/*
+		$HeadX = 250;
+		if(strlen($MapName)>8) $HeadX = $HeadX - 15; 
+		$pdf->addText($HeadX,765,14,"<i><b>".ucfirst($MapName)." Map</b></i>");
+		$YCord = 770;
+		$pdf->line(50,$YCord,200,$YCord);
+		$pdf->line(400,$YCord,550,$YCord);*/
+
+		/*$pdf->setLineStyle(1.7);
+		$pdf->addText($HeadX,758,14,"<i><b>".ucfirst($MapName)." Map</b></i>");
+		$pdf->rectangle(50,747,500,33);
+		$pdf->setLineStyle(1);*/
+
+		/***********************************/
+		$pdf->setColor(255,255,255,1);		 // Create White Space at bottom of Image
+		$pdf->filledRectangle(47,52,520,63);
+
+
+		/*$pdf->setColor(255,255,0,1);	
+		$pdf->filledRectangle(230,112,170,20);*/
+		$pdf->addText(230,120,9,"\n<c:alink:".$Config['MapUrl']."><i>Click here to access Satelite view</i></c:alink>");
+		$pdf->setColor(0,0,0,1);
+
+
+	}
+
+
+}
+
+/********************************/
+
+// define a clas extension to allow the use of a callback to get the table of contents, and to put the dots in the label
+class Creport extends Cezpdf {
+
+	var $reportContents = array();
+
+	function Creport($p,$o){
+	  $this->Cezpdf($p,$o);
+	}
+
+	function rf($info){
+	  // this callback records all of the table of contents entries, it also places a destination marker there
+	  // so that it can be linked too
+	  $tmp = $info['p'];
+	  $lvl = $tmp[0];
+	  $lbl = rawurldecode(substr($tmp,1));
+	  $num=$this->ezWhatPageNumber($this->ezGetCurrentPageNumber());
+	  $this->reportContents[] = array($lbl,$num,$lvl );
+	  $this->addDestination('label'.(count($this->reportContents)-1),'FitH',$info['y']+$info['height']);
+	}
+
+
+
+
+	function dots($info){
+	  // draw a dotted line over to the right and put on a page number
+	  $tmp = $info['p'];
+	  $lvl = $tmp[0];
+	  $lbl = substr($tmp,1);
+	  $xpos = 480;
+
+	  switch($lvl){
+		case '1':
+		  $size=11;
+		  $thick=1;
+		  break;
+		case '2':
+		  $size=10;
+		  $thick=0.5;
+		  break;
+	  }
+	  $this->setColor(0,0,0,1);
+	  $this->saveState();
+	  $this->setLineStyle($thick,'round','',array(0,10));
+	  $this->line($xpos,$info['y'],$info['x']+5,$info['y']);
+	  $this->restoreState();
+	  $lbl = $lbl -1;
+	  $this->addText($xpos+5,$info['y'],$size,$lbl);
+
+
+	}
+
+
+}
+/******************************/
+class Prodigy_DBF {
+    private $Filename, $DB_Type, $DB_Update, $DB_Records, $DB_FirstData, $DB_RecordLength, $DB_Flags, $DB_CodePageMark, $DB_Fields, $FileHandle, $FileOpened;
+    private $Memo_Handle, $Memo_Opened, $Memo_BlockSize;
+
+    private function Initialize() {
+
+        if($this->FileOpened) {
+            fclose($this->FileHandle);
+        }
+
+        if($this->Memo_Opened) {
+            fclose($this->Memo_Handle);
+        }
+
+        $this->FileOpened = false;
+        $this->FileHandle = NULL;
+        $this->Filename = NULL;
+        $this->DB_Type = NULL;
+        $this->DB_Update = NULL;
+        $this->DB_Records = NULL;
+        $this->DB_FirstData = NULL;
+        $this->DB_RecordLength = NULL;
+        $this->DB_CodePageMark = NULL;
+        $this->DB_Flags = NULL;
+        $this->DB_Fields = array();
+
+        $this->Memo_Handle = NULL;
+        $this->Memo_Opened = false;
+        $this->Memo_BlockSize = NULL;
+    }
+
+    public function __construct($Filename, $MemoFilename = NULL) {
+        $this->Prodigy_DBF($Filename, $MemoFilename);
+    }
+
+    public function Prodigy_DBF($Filename, $MemoFilename = NULL) {
+        $this->Initialize();
+        $this->OpenDatabase($Filename, $MemoFilename);
+    }
+
+    public function OpenDatabase($Filename, $MemoFilename = NULL) {
+        $Return = false;
+        $this->Initialize();
+
+        $this->FileHandle = fopen($Filename, "r");
+        if($this->FileHandle) {
+            // DB Open, reading headers
+            $this->DB_Type = dechex(ord(fread($this->FileHandle, 1)));
+            $LUPD = fread($this->FileHandle, 3);
+            $this->DB_Update = ord($LUPD[0])."/".ord($LUPD[1])."/".ord($LUPD[2]);
+            $Rec = unpack("V", fread($this->FileHandle, 4));
+            $this->DB_Records = $Rec[1];
+            $Pos = fread($this->FileHandle, 2);
+            $this->DB_FirstData = (ord($Pos[0]) + ord($Pos[1]) * 256);
+            $Len = fread($this->FileHandle, 2);
+            $this->DB_RecordLength = (ord($Len[0]) + ord($Len[1]) * 256);
+            fseek($this->FileHandle, 28); // Ignoring "reserved" bytes, jumping to table flags
+            $this->DB_Flags = dechex(ord(fread($this->FileHandle, 1)));
+            $this->DB_CodePageMark = ord(fread($this->FileHandle, 1));
+            fseek($this->FileHandle, 2, SEEK_CUR);    // Ignoring next 2 "reserved" bytes
+
+            // Now reading field captions and attributes
+            while(!feof($this->FileHandle)) {
+
+                // Checking for end of header
+                if(ord(fread($this->FileHandle, 1)) == 13) {
+                    break;  // End of header!
+                } else {
+                    // Go back
+                    fseek($this->FileHandle, -1, SEEK_CUR);
+                }
+
+                $Field["Name"] = trim(fread($this->FileHandle, 11));
+                $Field["Type"] = fread($this->FileHandle, 1);
+                fseek($this->FileHandle, 4, SEEK_CUR);  // Skipping attribute "displacement"
+                $Field["Size"] = ord(fread($this->FileHandle, 1));
+                fseek($this->FileHandle, 15, SEEK_CUR); // Skipping any remaining attributes
+				
+                $this->DB_Fields[] = $Field;
+
+            }
+
+            // Setting file pointer to the first record
+            fseek($this->FileHandle, $this->DB_FirstData);
+
+            $this->FileOpened = true;
+
+            // Open memo file, if exists
+            if(!empty($MemoFilename) and file_exists($MemoFilename) and preg_match("%^(.+).fpt$%i", $MemoFilename)) {
+                $this->Memo_Handle = fopen($MemoFilename, "r");
+                if($this->Memo_Handle) {
+                    $this->Memo_Opened = true;
+
+                    // Getting block size
+                    fseek($this->Memo_Handle, 6);
+                    $Data = unpack("n", fread($this->Memo_Handle, 2));
+                    $this->Memo_BlockSize = $Data[1];
+                }
+            }
+        }
+
+        return $Return;
+    }
+
+    public function GetNextRecord($FieldCaptions = false) {
+        $Return = NULL;
+        $Record = array();
+
+        if(!$this->FileOpened) {
+            $Return = false;
+        } elseif(feof($this->FileHandle)) {
+            $Return = NULL;
+        } else {
+            // File open and not EOF
+            fseek($this->FileHandle, 1, SEEK_CUR);  // Ignoring DELETE flag
+
+			
+            foreach($this->DB_Fields as $Field) {
+
+                $RawData = fread($this->FileHandle, $Field["Size"]);
+                // Checking for memo reference
+
+				
+
+                if($Field["Type"] == "M" and $Field["Size"] == 4 and !empty($RawData)) {
+                    // Binary Memo reference
+                    $Memo_BO = unpack("V", $RawData);
+                    if($this->Memo_Opened and $Memo_BO != 0) {
+                        fseek($this->Memo_Handle, $Memo_BO[1] * $this->Memo_BlockSize);
+                        $Type = unpack("N", fread($this->Memo_Handle, 4));
+						
+                        if($Type[1] == "1") {
+                            $Len = unpack("N", fread($this->Memo_Handle, 4));
+                            $Value = trim(fread($this->Memo_Handle, $Len[1]));
+                        } else {
+                            // Pictures will not be shown
+                            //$Value = "{BINARY_PICTURE}";
+							$Value = "";
+                        }
+						
+                    } else {
+                        $Value = "{NO_MEMO_FILE_OPEN}";
+                    }
+                } else {
+					$Value = trim($RawData);
+
+					if($Field["Type"] == "M"){
+						
+						if(trim($RawData) > 0)   {
+							/*fseek($this->Memo_Handle, (trim($RawData) * $this->Memo_BlockSize)+8);
+							$Value = trim(fread($this->Memo_Handle, $this->Memo_BlockSize));*/
+
+							fseek($this->Memo_Handle, (trim($RawData) * $this->Memo_BlockSize)+4);
+							$Len  = unpack("N", fread($this->Memo_Handle, 4));
+							$Value = trim(fread($this->Memo_Handle, $Len[1] ));
+						}
+						else {
+							$Value = trim($RawData);
+						}
+					}else{
+						$Value = trim($RawData);
+					}
+
+                }
+				
+
+                if($FieldCaptions) {
+                    $Record[$Field["Name"]] = $Value;
+                } else {
+                    $Record[] = $Value;
+                }
+            }
+			
+            $Return = $Record;
+        }
+
+        return $Return;
+    }
+
+    function __destruct() {
+        // Cleanly close any open files before destruction
+        $this->Initialize();
+    }
+}
+
+/***************************************/
+
+function imageThumb($filename, $imageThumbPath, $width , $height)
+   	{
+		// Get new dimensions	
+		
+		$backColor = 'ffffff';
+
+		list($width_orig, $height_orig) = getimagesize($filename);
+		if($width_orig >= $width){
+			if ($width && ($width_orig < $height_orig)) 
+			{
+				$width = ($height / $height_orig) * $width_orig;
+			} 
+			else 
+			{
+				$height = ($width / $width_orig) * $height_orig;
+			}
+		}else{
+				$width = $width_orig;
+				$height = $height_orig;
+		}
+		$imageInfo = getimagesize($filename);
+		$type = $imageInfo['mime'];		
+
+		if(($type == 'image/jpg') || ($type == 'image/jpeg')) 
+		{
+			$imSource = @imagecreatefromjpeg($filename);
+		}
+		else if ($type == 'image/gif') 
+        {
+          $imSource = @imagecreatefromgif($filename);
+        }
+		else if ($type == 'image/png') 
+        {
+          $imSource = @imagecreatefrompng($filename);
+        }
+		
+		if (function_exists('imagecreatetruecolor')) {
+   			$imDestination = imagecreatetruecolor($width, $height);
+		} else {
+   			$imDestination = imagecreate($width, $height);
+		}
+
+		/////////////////////////////
+		
+		if($backColor != '' && $type == 'image/gif'){
+			$RGBArray = html2rgb($backColor);
+			$R = $RGBArray[0];
+			$G = $RGBArray[1];
+			$B = $RGBArray[2];
+			$th_bg_color = imagecolorallocate($imDestination, $R , $G, $B);
+			imagefill($imDestination, 0, 0, $th_bg_color);
+			imagecolortransparent($imDestination, $th_bg_color);
+		}
+		
+		/////////////////////////////
+
+		imagecopyresampled($imDestination, $imSource, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+		//$imageCreated = imagejpeg($image_p,$imageThumbPath, 100);
+		
+		echo $type; exit;
+
+		if(($type == 'image/jpg') || ($type == 'image/jpeg')) 
+		{
+			$imageCreated = imagejpeg($imDestination, $imageThumbPath,75);
+		}
+		else if ($type == 'image/gif') 
+        {
+			$imageCreated = imagegif($imDestination, $imageThumbPath,75);
+		}	
+		else if ($type == 'image/png') 
+        {
+			$imageCreated = imagepng($imDestination, $imageThumbPath,75);
+		}	
+		
+
+		imagedestroy($imSource);
+		imagedestroy($imDestination);
+		
+				exit;
+
+		return true;
+   	}
+?>
