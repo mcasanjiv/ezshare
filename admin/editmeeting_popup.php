@@ -6,7 +6,7 @@ $objMeeting=new Meeting();
 /*    edit the meetings * ************** */
 if (!empty($_GET['edit'])) { 
     $arryMeeting = $objMeeting->GetMeeting($_GET['edit'], '');
-    $arryMeetingDetail = $objMeeting->GetMeeting($_GET['edit'], '');
+   // $arryMeetingDetail = $objMeeting->GetMeeting($_GET['edit'], '');
    //print_r($arryMeeting) ; die('JI');
     $meeting_Id = $_REQUEST['edit']; 
     if (empty($arryMeeting[0]['meeting_Id'])) {

@@ -79,7 +79,8 @@ function checkMeetingId(){
                                 <td width="10%"  class="head1" >Moderator Pwd</td>
                                 <td  width="10%"  class="head1" >Attendee Pwd</td>
                               <!--<td width="6%"  align="center" class="head1" >Status</td> -->
-                                <td width="20%"  align="center"  class="head1 head1_action" >Action</td>
+                                <td width="8%"  align="center"  class="head1 head1_action" >Action</td>
+                                 <td width="20%"  align="center"  class="head1 head1_action" >Status</td>
                             </tr>
 <? //} else { ?>
                          <!--    <tr align="left"  >
@@ -176,6 +177,9 @@ function checkMeetingId(){
      <!-- <a href="vContact.php?view=<?= $values['AddID'] ?>&module=<?= $_GET['module'] ?>&curP=<?= $_GET['curP'] ?>" ><?= $view ?></a>--> 
         <a title="edit meeting" href="editmeeting_popup.php?edit=<?= $values['meetingId'] ?>&curP=<?= $_GET['curP'] ?>pop=1" target="_blank" class="fancybox fancybox.iframe"><?= $edit ?></a>
         <a title="delete meeting" href="dashboard.php?del_id=<?php echo $values['meeting_Id']; ?>&curP=<?php echo $_GET['curP']; ?>" onclick="return confirmDialog(this, '<?= $ModuleName ?>')"  ><?= $delete ?></a>
+      </td>
+      
+       <td  align="center" class="head1_inner" >
        <?php 
        if(!empty($values['loginUrl'])){
        				$url = $values['loginUrl']; 
@@ -184,22 +188,24 @@ function checkMeetingId(){
        		 	$url = "getJoinMeetingUrlModerator_popup.php?join=".$values['meetingId']."&view=".$values['meeting_Id'];
        		 	$fancy1 = 'fancybox ';
        		 }
-       
+       		 if(!isset($_GET['MeetingHistory'])){
        ?>
         <a title="join meeting" href="<?=$url?>" target="_blank" class="<?=$fancy1?>"><?= $view ?>Join meeting</a> 
-         <a title="share" href="shareMeetingUrl_popup.php?join=<?= $values['meetingId'] ?>&curP=<?= $_GET['curP'] ?>pop=1" target="_blank" class="fancybox fancybox.iframe"><?= $view ?>Share</a>
-          <a title="ViewAttendees" href="viewattendees_popup.php?view=<?= $values['meetingId'] ?>&curP=<?= $_GET['curP'] ?>pop=1" target="_blank" class="fancybox fancybox.iframe"><?= $viewmeetings ?></a>    
-      </td>
+        <a title="share" href="shareMeetingUrl_popup.php?join=<?= $values['meetingId'] ?>&curP=<?= $_GET['curP'] ?>pop=1" target="_blank" class="fancybox fancybox.iframe"><?= $view ?>Share</a>
+        <?php }?>
+        <a title="ViewAttendees" href="viewattendees_popup.php?view=<?= $values['meetingId'] ?>&curP=<?= $_GET['curP'] ?>pop=1" target="_blank" class="fancybox fancybox.iframe"><?= $viewmeetings ?>sent</a>
+       </td>
+       
       </tr>
                             <?php } // foreach end //?>
 
 <?php } else { ?>
                             <tr align="center" >
-                                <td  colspan="8" class="no_record"><?= NO_RECORD ?></td>
+                                <td  colspan="9" class="no_record"><?= NO_RECORD ?></td>
                             </tr>
 <?php } ?>
 
-                        <tr >  <td  colspan="8" >Total Record(s) : &nbsp;<?php echo $num; ?>      <?php if (count($arryMeeting) > 0) { ?>
+                        <tr >  <td  colspan="9" >Total Record(s) : &nbsp;<?php echo $num; ?>      <?php if (count($arryMeeting) > 0) { ?>
                                     &nbsp;&nbsp;&nbsp;     Page(s) :&nbsp; <?php echo $pagerLink;
 }
 ?></td>

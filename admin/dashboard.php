@@ -7,7 +7,7 @@
 		$arryDepartment= $objConfig->GetAllowedDepartmentUser($_SESSION['UserID']);
 		$NumAllowedDepartment = sizeof($arryDepartment);
 	}
-//print_r($_SESSION);
+print_r($_SESSION);
  $objMeeting = new Meeting();
 	/****************************/
 	
